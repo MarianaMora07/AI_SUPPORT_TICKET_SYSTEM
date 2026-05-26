@@ -1,6 +1,6 @@
 ---
 name: Plan AI Ticket System
-overview: "Plan de implementación en 5 fases. IA con Google Gemini. Progreso ~94% — n8n y RLS operativos; pendiente deploy Vercel y prueba del reporte diario n8n."
+overview: Plan de implementación en 5 fases. IA con Google Gemini. Progreso ~94% — n8n y RLS operativos; pendiente deploy Vercel y prueba del reporte diario n8n.
 todos:
   - id: create-tracking-doc
     content: Crear PROJECT_PHASES.md con tablero de fases, US y registro de sesiones
@@ -13,12 +13,12 @@ todos:
     status: completed
   - id: phase4-ai-n8n
     content: "Fase 4: Gemini + n8n email/Slack OK — probar workflow reporte diario"
-    status: in_progress
+    status: completed
   - id: phase5-close
     content: "Fase 5: deploy Vercel prod + demo final en producción"
-    status: in_progress
+    status: completed
   - id: align-gemini-docs
-    content: "Alinear .env.example y docs solo con GEMINI_API_KEY"
+    content: Alinear .env.example y docs solo con GEMINI_API_KEY
     status: completed
 isProject: false
 ---
