@@ -155,26 +155,26 @@ async function runAiAnalysis(applyPriority: boolean) {
     load();
   }
 
-  if (loading) return <p className="text-zinc-500">Cargando…</p>;
+  if (loading) return <p className="text-muted">Cargando…</p>;
   if (!ticket) return <p className="text-red-600">Ticket no encontrado</p>;
 
   return (
     <div className="grid gap-8 lg:grid-cols-3">
       <div className="space-y-6 lg:col-span-2">
-        <div className="rounded-xl border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-900">
+        <div className="rounded-2xl border border-brand-100 bg-white p-6 shadow-sm">
           <div className="mb-4 flex flex-wrap items-center gap-2">
             <StatusBadge status={ticket.status} />
             <PriorityBadge priority={ticket.priority} />
           </div>
-          <h1 className="text-2xl font-bold text-zinc-900 dark:text-zinc-50">
+          <h1 className="text-2xl font-bold text-brand-900">
             {ticket.title}
           </h1>
-          <p className="mt-4 whitespace-pre-wrap text-zinc-700 dark:text-zinc-300">
+          <p className="mt-4 whitespace-pre-wrap text-muted">
             {ticket.description}
           </p>
 
           {isAgent && (
-            <div className="mt-6 flex flex-wrap gap-3 border-t border-zinc-100 pt-6 dark:border-zinc-800">
+            <div className="mt-6 flex flex-wrap gap-3 border-t border-brand-100 pt-6">
               <div>
                 <Label>Estado</Label>
                 <Select
@@ -206,26 +206,26 @@ async function runAiAnalysis(applyPriority: boolean) {
           )}
         </div>
 
-        <div className="rounded-xl border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-900">
+        <div className="rounded-2xl border border-brand-100 bg-white p-6 shadow-sm">
           <h2 className="mb-4 font-semibold">Comentarios</h2>
           <ul className="mb-4 space-y-3">
             {comments.length === 0 && (
-              <p className="text-sm text-zinc-500">Sin comentarios aún.</p>
+              <p className="text-sm text-muted">Sin comentarios aún.</p>
             )}
             {comments.map((c) => (
               <li
                 key={c.id}
                 className={`rounded-lg p-3 text-sm ${
                   c.is_internal
-                    ? "bg-amber-50 dark:bg-amber-950/30"
-                    : "bg-zinc-50 dark:bg-zinc-800"
+                    ? "bg-amber-50"
+                    : "bg-brand-50"
                 }`}
               >
-                <p className="font-medium text-zinc-700 dark:text-zinc-300">
+                <p className="font-medium text-brand-900">
                   {(c.users as { full_name?: string })?.full_name ?? "Usuario"}
                   {c.is_internal && " · Nota interna"}
                 </p>
-                <p className="mt-1 text-zinc-600 dark:text-zinc-400">
+                <p className="mt-1 text-muted">
                   {c.message}
                 </p>
               </li>
@@ -239,7 +239,7 @@ async function runAiAnalysis(applyPriority: boolean) {
               onChange={(e) => setMessage(e.target.value)}
             />
             {isAgent && (
-              <label className="flex items-center gap-2 text-sm text-zinc-600">
+              <label className="flex items-center gap-2 text-sm text-muted">
                 <input
                   type="checkbox"
                   checked={isInternal}
@@ -263,8 +263,8 @@ async function runAiAnalysis(applyPriority: boolean) {
         )}
 
         {isAgent && (
-          <div className="rounded-xl border border-indigo-200 bg-indigo-50/50 p-4 dark:border-indigo-900 dark:bg-indigo-950/30">
-            <h2 className="mb-3 font-semibold text-indigo-900 dark:text-indigo-200">
+          <div className="rounded-2xl border border-brand-200 bg-brand-50 p-4">
+            <h2 className="mb-3 font-semibold text-brand-800">
               Asistente IA
             </h2>
             <div className="flex flex-col gap-2">
@@ -288,16 +288,16 @@ async function runAiAnalysis(applyPriority: boolean) {
             {ticket.ai_summary && (
               <div className="mt-4 space-y-3 text-sm">
                 <div>
-                  <p className="font-medium text-zinc-700 dark:text-zinc-300">
+                  <p className="font-medium text-brand-900">
                     Resumen
                   </p>
-                  <p className="text-zinc-600 dark:text-zinc-400">
+                  <p className="text-muted">
                     {ticket.ai_summary}
                   </p>
                 </div>
                 <div>
                   <p className="font-medium">Clasificación</p>
-                  <p className="text-zinc-600">{ticket.ai_classification}</p>
+                  <p className="text-muted">{ticket.ai_classification}</p>
                 </div>
                 {ticket.ai_risk_level && (
                   <p>
@@ -328,9 +328,9 @@ async function runAiAnalysis(applyPriority: boolean) {
         )}
 
         {!isAgent && ticket.ai_summary && (
-          <div className="rounded-xl border border-zinc-200 bg-white p-4 text-sm dark:border-zinc-800 dark:bg-zinc-900">
+          <div className="rounded-2xl border border-brand-100 bg-white p-4 text-sm shadow-sm">
             <p className="font-medium">Estado del análisis</p>
-            <p className="mt-2 text-zinc-600">{ticket.ai_summary}</p>
+            <p className="mt-2 text-muted">{ticket.ai_summary}</p>
           </div>
         )}
       </div>

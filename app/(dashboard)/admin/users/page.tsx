@@ -9,7 +9,7 @@ export default async function AdminUsersPage() {
   if (!profile || !canAccessAdmin(profile.role)) redirect('/dashboard');
   return (
     <div>
-      <h1 className="mb-6 text-2xl font-bold">Administración</h1>
+      <h1 className="mb-6 text-2xl font-bold text-brand-900">Administración</h1>
       <div className="mb-8 space-y-8">
         <N8nTestPanel />
         <DailyReportPanel />

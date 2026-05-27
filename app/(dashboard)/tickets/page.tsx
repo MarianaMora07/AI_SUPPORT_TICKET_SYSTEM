@@ -8,7 +8,7 @@ export default async function TicketsPage() {
   return (
     <div>
       <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Tickets</h1>
+        <h1 className="text-2xl font-bold text-brand-900">Tickets</h1>
         {profile?.role === 'User' && (
           <Link href="/tickets/new"><Button>Nuevo ticket</Button></Link>
         )}

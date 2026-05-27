@@ -30,9 +30,9 @@ export function N8nTestPanel() {
   }
 
   return (
-    <div className="rounded-xl border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-900">
-      <h2 className="mb-2 font-semibold">Probar conexión n8n</h2>
-      <p className="mb-4 text-sm text-zinc-500">
+    <div className="rounded-2xl border border-brand-100 bg-white p-6 shadow-sm">
+      <h2 className="mb-2 font-semibold text-brand-900">Probar conexión n8n</h2>
+      <p className="mb-4 text-sm text-muted">
         Envía un POST de prueba a las URLs de <code>.env.local</code>. Revisa también Executions en n8n.
       </p>
       <Button type="button" onClick={runTest} disabled={loading}>

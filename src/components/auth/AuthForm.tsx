@@ -46,9 +46,9 @@ export function LoginForm() {
       <Button type="submit" disabled={loading} className="w-full">
         {loading ? 'Entrando…' : 'Iniciar sesión'}
       </Button>
-      <p className="text-center text-sm text-zinc-600">
+      <p className="text-center text-sm text-muted">
         ¿No tienes cuenta?{' '}
-        <Link href="/register" className="text-indigo-600 hover:underline">
+        <Link href="/register" className="font-medium text-brand-600 hover:text-brand-700 hover:underline">
           Regístrate
         </Link>
       </p>
@@ -102,9 +102,9 @@ export function RegisterForm() {
       <Button type="submit" disabled={loading} className="w-full">
         {loading ? 'Creando cuenta…' : 'Registrarse'}
       </Button>
-      <p className="text-center text-sm text-zinc-600">
+      <p className="text-center text-sm text-muted">
         ¿Ya tienes cuenta?{' '}
-        <Link href="/login" className="text-indigo-600 hover:underline">
+        <Link href="/login" className="font-medium text-brand-600 hover:text-brand-700 hover:underline">
           Inicia sesión
         </Link>
       </p>

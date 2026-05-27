@@ -1,13 +1,23 @@
+import Link from 'next/link';
 import { type ButtonHTMLAttributes } from 'react';
 
-const variants = {
-  primary: 'bg-indigo-600 text-white hover:bg-indigo-700',
-  secondary: 'border border-zinc-300 bg-white text-zinc-900 hover:bg-zinc-50 dark:border-zinc-600 dark:bg-zinc-900 dark:text-zinc-100',
-  danger: 'bg-red-600 text-white hover:bg-red-700',
-  ghost: 'text-zinc-600 hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-800',
-};
+export const buttonBase =
+  'inline-flex items-center justify-center rounded-xl px-5 py-2.5 text-sm font-semibold transition-all duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500 disabled:opacity-50 disabled:pointer-events-none';
 
-type Variant = keyof typeof variants;
+export const buttonVariants = {
+  primary:
+    'bg-brand-600 text-white shadow-md shadow-brand-600/25 hover:bg-brand-700 hover:shadow-lg hover:shadow-brand-600/30 active:scale-[0.98]',
+  secondary:
+    'border-2 border-brand-200 bg-white text-brand-700 hover:border-brand-400 hover:bg-brand-50 active:scale-[0.98]',
+  outline:
+    'border-2 border-white/80 bg-white/10 text-white backdrop-blur-sm hover:bg-white/20 hover:border-white',
+  danger: 'bg-red-600 text-white hover:bg-red-700 shadow-sm',
+  ghost: 'text-brand-700 hover:bg-brand-50',
+  light:
+    'bg-white text-brand-700 shadow-md hover:bg-brand-50 active:scale-[0.98]',
+} as const;
+
+type Variant = keyof typeof buttonVariants;
 
 export function Button({
   variant = 'primary',
@@ -16,8 +26,26 @@ export function Button({
 }: ButtonHTMLAttributes<HTMLButtonElement> & { variant?: Variant }) {
   return (
     <button
-      className={`inline-flex items-center justify-center rounded-lg px-4 py-2 text-sm font-medium transition disabled:opacity-50 ${variants[variant]} ${className}`}
+      className={`${buttonBase} ${buttonVariants[variant]} ${className}`}
       {...props}
     />
+  );
+}
+
+export function ButtonLink({
+  href,
+  variant = 'primary',
+  className = '',
+  children,
+}: {
+  href: string;
+  variant?: Variant;
+  className?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <Link href={href} className={`${buttonBase} ${buttonVariants[variant]} ${className}`}>
+      {children}
+    </Link>
   );
 }

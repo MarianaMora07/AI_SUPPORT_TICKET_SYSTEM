@@ -22,27 +22,27 @@ export function TicketList({ statusFilter }: { statusFilter?: string }) {
       .finally(() => setLoading(false));
   }, [statusFilter]);
 
-  if (loading) return <p className="text-zinc-500">Cargando tickets…</p>;
+  if (loading) return <p className="text-muted">Cargando tickets…</p>;
   if (error) return <p className="text-red-600">{error}</p>;
   if (tickets.length === 0) {
     return (
-      <div className="rounded-xl border border-dashed border-zinc-300 p-12 text-center text-zinc-500">
+      <div className="rounded-2xl border border-dashed border-brand-200 bg-white p-12 text-center text-muted">
         No hay tickets. Crea uno para comenzar.
       </div>
     );
   }
 
   return (
-    <ul className="divide-y divide-zinc-200 rounded-xl border border-zinc-200 bg-white dark:divide-zinc-800 dark:border-zinc-800 dark:bg-zinc-900">
+    <ul className="divide-y divide-brand-100 overflow-hidden rounded-2xl border border-brand-100 bg-white shadow-sm">
       {tickets.map((t) => (
         <li key={t.id}>
           <Link
             href={`/tickets/${t.id}`}
-            className="flex flex-col gap-2 px-4 py-4 transition hover:bg-zinc-50 sm:flex-row sm:items-center sm:justify-between dark:hover:bg-zinc-800/50"
+            className="flex flex-col gap-2 px-4 py-4 transition hover:bg-brand-50 sm:flex-row sm:items-center sm:justify-between"
           >
             <div>
-              <p className="font-medium text-zinc-900 dark:text-zinc-100">{t.title}</p>
-              <p className="mt-1 line-clamp-1 text-sm text-zinc-500">{t.description}</p>
+              <p className="font-medium text-brand-900">{t.title}</p>
+              <p className="mt-1 line-clamp-1 text-sm text-muted">{t.description}</p>
             </div>
             <div className="flex flex-wrap items-center gap-2">
               <StatusBadge status={t.status} />

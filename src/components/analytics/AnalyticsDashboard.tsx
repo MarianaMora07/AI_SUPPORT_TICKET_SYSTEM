@@ -37,8 +37,8 @@ export function AnalyticsDashboard() {
       <MetricCard label="Creados (7 días)" value={data.createdLast7Days} />
 
       <div className="grid gap-6 md:grid-cols-2">
-        <div className="rounded-xl border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-900">
-          <h2 className="mb-4 font-semibold">Por estado</h2>
+        <div className="rounded-2xl border border-brand-100 bg-white p-6 shadow-sm">
+          <h2 className="mb-4 font-semibold text-brand-900">Por estado</h2>
           <ul className="space-y-2 text-sm">
             {Object.entries(data.byStatus).map(([k, v]) => (
               <li key={k} className="flex justify-between">
@@ -48,8 +48,8 @@ export function AnalyticsDashboard() {
             ))}
           </ul>
         </div>
-        <div className="rounded-xl border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-900">
-          <h2 className="mb-4 font-semibold">Por prioridad</h2>
+        <div className="rounded-2xl border border-brand-100 bg-white p-6 shadow-sm">
+          <h2 className="mb-4 font-semibold text-brand-900">Por prioridad</h2>
           <ul className="space-y-2 text-sm">
             {Object.entries(data.byPriority).map(([k, v]) => (
               <li key={k} className="flex justify-between">
@@ -66,9 +66,9 @@ export function AnalyticsDashboard() {
 
 function MetricCard({ label, value }: { label: string; value: string | number }) {
   return (
-    <div className="rounded-xl border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-900">
-      <p className="text-sm text-zinc-500">{label}</p>
-      <p className="mt-1 text-3xl font-bold text-indigo-600">{value}</p>
+    <div className="rounded-2xl border border-brand-100 bg-white p-6 shadow-sm transition hover:shadow-md">
+      <p className="text-sm text-muted">{label}</p>
+      <p className="mt-1 text-3xl font-bold text-brand-600">{value}</p>
     </div>
   );
 }

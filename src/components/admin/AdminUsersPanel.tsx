@@ -43,9 +43,9 @@ export function AdminUsersPanel() {
   return (
     <div>
       {message && <p className="mb-4 text-sm text-green-700">{message}</p>}
-      <div className="overflow-hidden rounded-xl border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900">
+      <div className="overflow-hidden rounded-2xl border border-brand-100 bg-white shadow-sm">
         <table className="w-full text-left text-sm">
-          <thead className="border-b border-zinc-200 bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-800/50">
+          <thead className="border-b border-brand-100 bg-brand-50">
             <tr>
               <th className="px-4 py-3">Email</th>
               <th className="px-4 py-3">Nombre</th>
@@ -74,7 +74,7 @@ function UserRow({
   const [role, setRole] = useState<UserRole>(user.role);
 
   return (
-    <tr className="border-b border-zinc-100 dark:border-zinc-800">
+    <tr className="border-b border-brand-50">
       <td className="px-4 py-3">{user.email}</td>
       <td className="px-4 py-3">{user.full_name}</td>
       <td className="px-4 py-3">
