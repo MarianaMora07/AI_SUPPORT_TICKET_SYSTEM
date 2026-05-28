@@ -6,15 +6,15 @@ export const buttonBase =
 
 export const buttonVariants = {
   primary:
-    'bg-brand-600 text-white shadow-md shadow-brand-600/25 hover:bg-brand-700 hover:shadow-lg hover:shadow-brand-600/30 active:scale-[0.98]',
+    'bg-brand-600 text-white shadow-md shadow-brand-600/25 hover:bg-brand-700 hover:shadow-lg hover:shadow-brand-600/30 active:scale-[0.98] dark:bg-brand-500 dark:text-slate-950 dark:shadow-brand-900/40 dark:hover:bg-brand-400 dark:hover:shadow-brand-300/35',
   secondary:
-    'border-2 border-brand-200 bg-white text-brand-700 hover:border-brand-400 hover:bg-brand-50 active:scale-[0.98]',
+    'border-2 border-brand-200 bg-surface text-brand-800 hover:border-brand-400 hover:bg-brand-50 active:scale-[0.98] dark:border-brand-300/60 dark:bg-brand-100/10 dark:text-brand-900 dark:hover:bg-brand-200/20',
   outline:
     'border-2 border-white/80 bg-white/10 text-white backdrop-blur-sm hover:bg-white/20 hover:border-white',
   danger: 'bg-red-600 text-white hover:bg-red-700 shadow-sm',
   ghost: 'text-brand-700 hover:bg-brand-50',
   light:
-    'bg-white text-brand-700 shadow-md hover:bg-brand-50 active:scale-[0.98]',
+    'bg-surface text-brand-800 shadow-md hover:bg-brand-50 active:scale-[0.98] dark:bg-brand-100/15 dark:text-brand-900 dark:hover:bg-brand-200/25 dark:shadow-brand-900/40',
 } as const;
 
 type Variant = keyof typeof buttonVariants;

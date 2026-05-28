@@ -6,12 +6,14 @@ import { authService } from '@/src/services/authService';
 import type { UserRole } from '@/src/types/database';
 import { Button } from '@/src/components/ui/Button';
 import { Logo } from '@/src/components/layout/Logo';
+import { ThemeToggle } from '@/src/components/layout/ThemeToggle';
 
 const links: { href: string; label: string; roles?: UserRole[] }[] = [
   { href: '/dashboard', label: 'Inicio' },
   { href: '/tickets', label: 'Tickets' },
   { href: '/tickets/new', label: 'Nuevo ticket', roles: ['User', 'Admin', 'Agent'] },
   { href: '/analytics', label: 'Métricas', roles: ['Admin', 'Agent'] },
+  { href: '/settings', label: 'Perfil' },
   { href: '/admin/users', label: 'Usuarios', roles: ['Admin'] },
 ];
 
@@ -34,7 +36,7 @@ export function DashboardNav({
   }
 
   return (
-    <header className="sticky top-0 z-40 border-b border-brand-100 bg-white/90 shadow-sm backdrop-blur-md">
+    <header className="sticky top-0 z-40 border-b border-border bg-surface/90 shadow-sm backdrop-blur-md">
       <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3 sm:px-6">
         <div className="flex items-center gap-6">
           <Logo href="/dashboard" />
@@ -59,6 +61,7 @@ export function DashboardNav({
           </nav>
         </div>
         <div className="flex items-center gap-3">
+          <ThemeToggle className="hidden sm:inline-flex" />
           <span className="hidden rounded-full bg-brand-50 px-3 py-1 text-xs font-medium text-brand-800 sm:inline">
             {fullName ?? 'Usuario'} · {role}
           </span>

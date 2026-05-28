@@ -1,9 +1,14 @@
 import OpenAI from 'openai';
-import { aiAnalysisSchema, type AiAnalysisResult } from '../types/ai';
+import {
+  aiAnalysisSchema,
+  geminiAiResponseSchema,
+  normalizeAiPayload,
+  type AiAnalysisResult,
+} from '../types/ai';
 
 const OPENAI_MODEL = 'gpt-4o-mini';
 const ANTHROPIC_MODEL = 'claude-3-5-haiku-latest';
-const GEMINI_MODEL = 'gemini-3.5-flash';
+const GEMINI_MODEL = process.env.GEMINI_MODEL ?? 'gemini-3.5-flash';
 
 function buildPrompt(input: {
   title: string;
@@ -20,8 +25,13 @@ Para determinar el 'riskLevel', usa:
 - 'medium': Ralentiza el trabajo o fallas de herramientas secundarias.
 - 'low': Dudas comunes, consultas individuales o pruebas.
 
-Responde ÚNICAMENTE con un objeto JSON válido con estas llaves exactas:
-summary, classification, suggestions, riskLevel (low|medium|high), recommendedAction (assign|escalate|close|request_info).
+Responde ÚNICAMENTE con un objeto JSON válido con estas llaves exactas (todos los valores deben ser strings, no arrays):
+- summary: string
+- classification: string
+- suggestions: string (varias sugerencias separadas por saltos de línea, no un array)
+- riskLevel: "low" | "medium" | "high"
+- sentiment: "positive" | "neutral" | "negative" | "frustrated" (tono del usuario en título, descripción y comentarios)
+- recommendedAction (opcional): "assign" | "escalate" | "close" | "request_info"
 
 Título: ${input.title}
 Categoría: ${input.categoryName ?? 'N/A'}
@@ -38,8 +48,25 @@ function parseAiJson(raw: string): AiAnalysisResult {
     cleanJson = raw.substring(firstBrace, lastBrace + 1);
   }
 
-  const parsed = aiAnalysisSchema.safeParse(JSON.parse(cleanJson));
-  if (!parsed.success) throw new Error(`Formato IA inválido: ${parsed.error.message}`);
+  let json: unknown;
+  try {
+    json = JSON.parse(cleanJson);
+  } catch {
+    throw new Error('La IA no devolvió JSON válido');
+  }
+
+  let normalized: Record<string, unknown>;
+  try {
+    normalized = normalizeAiPayload(json);
+  } catch (err) {
+    throw new Error(err instanceof Error ? err.message : 'La IA no devolvió JSON válido');
+  }
+
+  const parsed = aiAnalysisSchema.safeParse(normalized);
+  if (!parsed.success) {
+    const fields = parsed.error.issues.map((i) => i.path.join('.')).join(', ');
+    throw new Error(`Formato IA inválido (${fields || 'campos desconocidos'})`);
+  }
   return parsed.data;
 }
 
@@ -58,8 +85,8 @@ async function analyzeWithGemini(prompt: string) {
       body: JSON.stringify({
         contents: [{ parts: [{ text: prompt }] }],
         generationConfig: {
-          // Le exigimos a Gemini que responda estrictamente en formato JSON
           responseMimeType: 'application/json',
+          responseSchema: geminiAiResponseSchema,
         },
       }),
     }
@@ -121,7 +148,7 @@ export async function analyzeTicket(input: {
 }) {
   const prompt = buildPrompt(input);
   const start = Date.now();
-  const provider = (process.env.AI_PROVIDER ?? 'openai').toLowerCase();
+  const provider = (process.env.AI_PROVIDER ?? 'gemini').toLowerCase();
 
   let raw: string;
   let modelVersion: string;

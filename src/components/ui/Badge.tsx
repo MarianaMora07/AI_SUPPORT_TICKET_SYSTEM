@@ -7,10 +7,10 @@ const statusColors: Record<TicketStatus, string> = {
 };
 
 const priorityColors: Record<TicketPriority, string> = {
-  Low: 'bg-zinc-100 text-zinc-700',
-  Medium: 'bg-sky-100 text-sky-800',
-  High: 'bg-orange-100 text-orange-800',
-  Urgent: 'bg-red-100 text-red-800',
+  Low: 'bg-zinc-100 text-zinc-700 dark:bg-zinc-700/30 dark:text-zinc-200',
+  Medium: 'bg-sky-100 text-sky-800 dark:bg-sky-900/40 dark:text-sky-200',
+  High: 'bg-orange-100 text-orange-800 dark:bg-orange-900/40 dark:text-orange-200',
+  Urgent: 'bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-200',
 };
 
 export function StatusBadge({ status }: { status: TicketStatus }) {

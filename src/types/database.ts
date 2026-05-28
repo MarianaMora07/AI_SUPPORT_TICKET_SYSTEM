@@ -30,6 +30,7 @@ export interface Ticket {
   ai_classification: string | null;
   ai_suggestions: string | null;
   ai_risk_level: string | null;
+  ai_sentiment: string | null;
   created_at: string;
   updated_at: string;
   categories?: Category | null;

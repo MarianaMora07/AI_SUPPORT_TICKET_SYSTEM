@@ -43,7 +43,7 @@ export function AdminUsersPanel() {
   return (
     <div>
       {message && <p className="mb-4 text-sm text-green-700">{message}</p>}
-      <div className="overflow-hidden rounded-2xl border border-brand-100 bg-white shadow-sm">
+      <div className="overflow-hidden rounded-2xl border border-border bg-surface shadow-sm">
         <table className="w-full text-left text-sm">
           <thead className="border-b border-brand-100 bg-brand-50">
             <tr>

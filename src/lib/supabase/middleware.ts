@@ -34,7 +34,8 @@ export async function updateSession(request: NextRequest) {
     path.startsWith('/dashboard') ||
     path.startsWith('/tickets') ||
     path.startsWith('/admin') ||
-    path.startsWith('/analytics');
+    path.startsWith('/analytics') ||
+    path.startsWith('/settings');
 
   let hasProfile = false;
   if (user) {

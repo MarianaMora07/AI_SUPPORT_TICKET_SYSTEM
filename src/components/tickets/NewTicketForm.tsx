@@ -50,7 +50,7 @@ export function NewTicketForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="max-w-xl space-y-4 rounded-2xl border border-brand-100 bg-white p-6 shadow-sm">
+    <form onSubmit={handleSubmit} className="mx-auto w-full max-w-3xl space-y-4 rounded-2xl border border-border bg-surface p-6 shadow-sm">
       {error && <p className="rounded-lg bg-red-50 p-3 text-sm text-red-700">{error}</p>}
       <div>
         <Label htmlFor="title">Título</Label>

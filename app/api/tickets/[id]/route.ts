@@ -3,6 +3,7 @@ import { createClient } from '@/src/lib/supabase/server';
 import { jsonOk, jsonError } from '@/src/lib/api-response';
 import { getSessionProfile, canAccessAgent } from '@/src/lib/auth';
 import { triggerN8nWebhook } from '@/src/lib/n8n';
+import { recordHighPriorityNotifications } from '@/src/services/notificationService';
 
 const updateSchema = z.object({
   status: z.enum(['Open', 'In Progress', 'Resolved']).optional(),
@@ -12,6 +13,7 @@ const updateSchema = z.object({
   ai_classification: z.string().optional(),
   ai_suggestions: z.string().optional(),
   ai_risk_level: z.string().optional(),
+  ai_sentiment: z.string().optional(),
 });
 
 export async function GET(_req: Request, { params }: { params: Promise<{ id: string }> }) {
@@ -40,12 +42,21 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
   const priority = parsed.data.priority ?? data.priority;
   const risk = parsed.data.ai_risk_level ?? data.ai_risk_level;
   if (priority === 'High' || priority === 'Urgent' || risk === 'high') {
-    await triggerN8nWebhook('N8N_WEBHOOK_HIGH_PRIORITY', {
+    const n8nResult = await triggerN8nWebhook('N8N_WEBHOOK_HIGH_PRIORITY', {
       event: 'ticket.high_priority',
       ticketId: id,
       title: data.title,
       priority,
       riskLevel: risk,
+    });
+    await recordHighPriorityNotifications({
+      ticketId: id,
+      ticketTitle: data.title,
+      ownerId: data.user_id,
+      event: 'ticket.high_priority',
+      priority,
+      riskLevel: risk,
+      n8nResult,
     });
   }
   return jsonOk(data);

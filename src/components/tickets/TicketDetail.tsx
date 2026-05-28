@@ -11,6 +11,17 @@ import type {
   TicketStatus,
   UserRole,
 } from "@/src/types/database";
+import { readJsonResponse } from "@/src/lib/fetch-json";
+
+const ticketCommentsApi = (ticketId: string) => `/api/ticket-comments/${ticketId}`;
+
+function isApiError(value: unknown): value is { error: string } {
+  return !!value && typeof value === "object" && "error" in value;
+}
+
+function isTicket(value: unknown): value is Ticket {
+  return !!value && typeof value === "object" && "id" in value && "title" in value;
+}
 
 const formatAiSuggestions = (suggestions: unknown): string => {
   if (!suggestions) return '';
@@ -57,28 +68,51 @@ export function TicketDetail({
 
   const isAgent = role === "Agent" || role === "Admin";
 
-  const load = useCallback(async () => {
-    const [tRes, cRes] = await Promise.all([
-      fetch(`/api/tickets/${ticketId}`),
-      fetch(`/api/tickets/${ticketId}/comments`),
-    ]);
-    const tData = await tRes.json();
-    const cData = await cRes.json();
-    if (tRes.ok) {
-      setTicket(tData);
-      // Aplicamos el formateador aquí para limpiar los corchetes de la BD
-      setSuggestionDraft(formatAiSuggestions(tData.ai_suggestions));
+  const load = useCallback(async (options?: { syncSuggestion?: boolean }) => {
+    const syncSuggestion = options?.syncSuggestion ?? false;
+    try {
+      const [tRes, cRes] = await Promise.all([
+        fetch(`/api/tickets/${ticketId}`),
+        fetch(ticketCommentsApi(ticketId)),
+      ]);
+      const tData = await readJsonResponse<Ticket | { error?: string }>(tRes);
+      const cData = await readJsonResponse<Comment[] | { error?: string }>(cRes);
+
+      if (tRes.ok && isTicket(tData)) {
+        setTicket(tData);
+        if (syncSuggestion) {
+          setSuggestionDraft(formatAiSuggestions(tData.ai_suggestions));
+        }
+      } else if (!tRes.ok) {
+        setTicket(null);
+        setError(isApiError(tData) ? tData.error : `No se pudo cargar el ticket (${tRes.status})`);
+      }
+
+      if (cRes.ok && Array.isArray(cData)) {
+        setComments(cData);
+      } else if (!cRes.ok) {
+        setComments([]);
+        if (tRes.ok) {
+          setError(
+            (prev) =>
+              prev ||
+              (isApiError(cData) ? cData.error : `No se pudieron cargar los comentarios (${cRes.status})`)
+          );
+        }
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Error al cargar el ticket");
+    } finally {
+      setLoading(false);
     }
-    if (cRes.ok) setComments(cData);
-    setLoading(false);
   }, [ticketId]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      load();
+      load({ syncSuggestion: true });
     }, 0);
 
-    const interval = setInterval(load, 15000);
+    const interval = setInterval(() => load(), 15000);
 
     return () => {
       clearTimeout(timer);
@@ -92,14 +126,14 @@ export function TicketDetail({
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(patch),
     });
-    const data = await res.json();
-    if (res.ok) setTicket(data);
-    else setError(data.error);
+    const data = await readJsonResponse<Ticket | { error?: string }>(res);
+    if (res.ok && isTicket(data)) setTicket(data);
+    else setError(isApiError(data) ? data.error : `Error al actualizar (${res.status})`);
   }
 
   async function addComment() {
     if (!message.trim()) return;
-    const res = await fetch(`/api/tickets/${ticketId}/comments`, {
+    const res = await fetch(ticketCommentsApi(ticketId), {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ message, is_internal: isInternal }),
@@ -132,9 +166,18 @@ async function runAiAnalysis(applyPriority: boolean) {
       }
 
       // Si todo está bien, ahora sí parseamos el JSON con total confianza
-      const data = await res.json();
+      const data = await readJsonResponse<{
+        ticket?: Ticket;
+        analysis?: { suggestions?: unknown };
+        error?: string;
+      }>(res);
       setAiLoading(false);
-      
+
+      if (!data?.ticket || !data.analysis) {
+        setError(data?.error ?? "Respuesta de IA inválida");
+        return;
+      }
+
       setTicket(data.ticket);
       setSuggestionDraft(formatAiSuggestions(data.analysis.suggestions));
       load();
@@ -147,11 +190,18 @@ async function runAiAnalysis(applyPriority: boolean) {
 
   async function applySuggestionAsComment() {
     if (!suggestionDraft.trim()) return;
-    await fetch(`/api/tickets/${ticketId}/comments`, {
+    const res = await fetch(ticketCommentsApi(ticketId), {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ message: suggestionDraft, is_internal: false }),
     });
+    if (!res.ok) {
+      const data = await readJsonResponse<{ error?: string }>(res);
+      setError(data?.error ?? `No se pudo publicar el comentario (${res.status})`);
+      return;
+    }
+    setSuggestionDraft("");
+    setError("");
     load();
   }
 
@@ -161,7 +211,7 @@ async function runAiAnalysis(applyPriority: boolean) {
   return (
     <div className="grid gap-8 lg:grid-cols-3">
       <div className="space-y-6 lg:col-span-2">
-        <div className="rounded-2xl border border-brand-100 bg-white p-6 shadow-sm">
+        <div className="rounded-2xl border border-border bg-surface p-6 shadow-sm">
           <div className="mb-4 flex flex-wrap items-center gap-2">
             <StatusBadge status={ticket.status} />
             <PriorityBadge priority={ticket.priority} />
@@ -174,7 +224,7 @@ async function runAiAnalysis(applyPriority: boolean) {
           </p>
 
           {isAgent && (
-            <div className="mt-6 flex flex-wrap gap-3 border-t border-brand-100 pt-6">
+            <div className="mt-6 flex flex-wrap gap-3 border-t border-border pt-6">
               <div>
                 <Label>Estado</Label>
                 <Select
@@ -206,7 +256,7 @@ async function runAiAnalysis(applyPriority: boolean) {
           )}
         </div>
 
-        <div className="rounded-2xl border border-brand-100 bg-white p-6 shadow-sm">
+        <div className="rounded-2xl border border-border bg-surface p-6 shadow-sm">
           <h2 className="mb-4 font-semibold">Comentarios</h2>
           <ul className="mb-4 space-y-3">
             {comments.length === 0 && (
@@ -299,6 +349,11 @@ async function runAiAnalysis(applyPriority: boolean) {
                   <p className="font-medium">Clasificación</p>
                   <p className="text-muted">{ticket.ai_classification}</p>
                 </div>
+                {ticket.ai_sentiment && (
+                  <p>
+                    Sentimiento: <strong>{ticket.ai_sentiment}</strong>
+                  </p>
+                )}
                 {ticket.ai_risk_level && (
                   <p>
                     Riesgo: <strong>{ticket.ai_risk_level}</strong>
@@ -328,7 +383,7 @@ async function runAiAnalysis(applyPriority: boolean) {
         )}
 
         {!isAgent && ticket.ai_summary && (
-          <div className="rounded-2xl border border-brand-100 bg-white p-4 text-sm shadow-sm">
+          <div className="rounded-2xl border border-border bg-surface p-4 text-sm shadow-sm">
             <p className="font-medium">Estado del análisis</p>
             <p className="mt-2 text-muted">{ticket.ai_summary}</p>
           </div>

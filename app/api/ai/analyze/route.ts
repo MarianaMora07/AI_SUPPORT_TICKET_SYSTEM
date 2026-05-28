@@ -4,6 +4,7 @@ import { jsonOk, jsonError } from '@/src/lib/api-response';
 import { getSessionProfile, canAccessAgent } from '@/src/lib/auth';
 import { analyzeTicket, mapRiskToPriority } from '@/src/services/aiService';
 import { triggerN8nWebhook } from '@/src/lib/n8n';
+import { recordHighPriorityNotifications } from '@/src/services/notificationService';
 import { log } from '@/src/lib/logger';
 
 const bodySchema = z.object({ ticketId: z.string().uuid(), applyPriority: z.boolean().optional() });
@@ -37,15 +38,26 @@ export async function POST(request: Request) {
       ai_classification: result.classification,
       ai_suggestions: result.suggestions,
       ai_risk_level: result.riskLevel,
+      ai_sentiment: result.sentiment,
     };
     if (parsed.data.applyPriority) updatePayload.priority = mapRiskToPriority(result.riskLevel);
     const { data: updated } = await supabase.from('tickets').update(updatePayload).eq('id', parsed.data.ticketId).select('*').single();
     if (result.riskLevel === 'high' || updated?.priority === 'High' || updated?.priority === 'Urgent') {
-      await triggerN8nWebhook('N8N_WEBHOOK_HIGH_PRIORITY', {
+      const n8nResult = await triggerN8nWebhook('N8N_WEBHOOK_HIGH_PRIORITY', {
         event: 'ticket.ai_high_risk',
         ticketId: parsed.data.ticketId,
         title: ticket.title,
         riskLevel: result.riskLevel,
+        priority: updated?.priority,
+      });
+      await recordHighPriorityNotifications({
+        ticketId: parsed.data.ticketId,
+        ticketTitle: ticket.title,
+        ownerId: ticket.user_id,
+        event: 'ticket.ai_high_risk',
+        priority: updated?.priority,
+        riskLevel: result.riskLevel,
+        n8nResult,
       });
     }
     return jsonOk({ analysis: result, ticket: updated, latencyMs, modelVersion });

@@ -23,14 +23,14 @@ export default async function DashboardPage() {
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        <div className="rounded-2xl border border-brand-100 bg-white p-6 shadow-sm shadow-brand-900/5 transition hover:shadow-md">
-          <p className="text-sm font-medium text-muted">Tus tickets</p>
+        <div className="rounded-2xl border border-border bg-surface p-6 shadow-sm shadow-brand-900/5 transition hover:shadow-md">
+          <p className="text-xs font-semibold uppercase tracking-[0.12em] text-brand-600">Resumen</p>
           <p className="mt-2 text-4xl font-bold text-brand-600">{count ?? 0}</p>
         </div>
 
         <Link
           href="/tickets"
-          className="group rounded-2xl border border-brand-200 bg-gradient-to-br from-brand-50 to-white p-6 shadow-sm transition hover:border-brand-300 hover:shadow-md"
+          className="group rounded-2xl border border-brand-200 bg-gradient-to-br from-brand-50 to-surface p-6 shadow-sm transition hover:border-brand-300 hover:shadow-md"
         >
           <p className="font-semibold text-brand-800 group-hover:text-brand-600">Ver tickets →</p>
           <p className="mt-1 text-sm text-muted">Cola y detalle de incidentes</p>
@@ -39,7 +39,7 @@ export default async function DashboardPage() {
         {profile.role === 'User' && (
           <Link
             href="/tickets/new"
-            className="group rounded-2xl border border-brand-100 bg-white p-6 shadow-sm transition hover:border-brand-200 hover:shadow-md"
+            className="group rounded-2xl border border-border bg-surface p-6 shadow-sm transition hover:border-brand-200 hover:shadow-md"
           >
             <p className="font-semibold text-brand-800">Nuevo ticket →</p>
             <p className="mt-1 text-sm text-muted">Reportar un incidente</p>
@@ -49,7 +49,7 @@ export default async function DashboardPage() {
         {(profile.role === 'Admin' || profile.role === 'Agent') && (
           <Link
             href="/analytics"
-            className="group rounded-2xl border border-brand-100 bg-white p-6 shadow-sm transition hover:border-brand-200 hover:shadow-md"
+            className="group rounded-2xl border border-border bg-surface p-6 shadow-sm transition hover:border-brand-200 hover:shadow-md"
           >
             <p className="font-semibold text-brand-800">Métricas →</p>
             <p className="mt-1 text-sm text-muted">Resumen y estadísticas</p>
@@ -58,7 +58,7 @@ export default async function DashboardPage() {
       </div>
 
       {profile.role === 'User' && (
-        <div className="mt-8 rounded-2xl border border-brand-100 bg-white p-6">
+        <div className="mt-8 rounded-2xl border border-border bg-surface p-6">
           <p className="text-sm text-muted">
             ¿Necesitas ayuda? Crea un ticket y recibirás confirmación por correo.
           </p>

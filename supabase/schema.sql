@@ -32,6 +32,7 @@ CREATE TABLE public.tickets (
     ai_classification VARCHAR(100),
     ai_suggestions TEXT,
     ai_risk_level VARCHAR(50),
+    ai_sentiment VARCHAR(32),
     created_at TIMESTAMPTZ DEFAULT TIMEZONE('utc', NOW()) NOT NULL,
     updated_at TIMESTAMPTZ DEFAULT TIMEZONE('utc', NOW()) NOT NULL
 );

@@ -37,7 +37,7 @@ export function DailyReportPanel() {
   }
 
   return (
-    <div className="rounded-2xl border border-brand-100 bg-white p-6 shadow-sm">
+    <div className="rounded-2xl border border-border bg-surface p-6 shadow-sm">
       <h2 className="mb-2 font-semibold text-brand-900">Reporte diario (cron n8n)</h2>
       <p className="mb-4 text-sm text-muted">
         Vista previa del JSON que el workflow cron debe obtener con{' '}

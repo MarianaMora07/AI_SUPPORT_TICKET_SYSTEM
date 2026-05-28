@@ -26,14 +26,14 @@ export function TicketList({ statusFilter }: { statusFilter?: string }) {
   if (error) return <p className="text-red-600">{error}</p>;
   if (tickets.length === 0) {
     return (
-      <div className="rounded-2xl border border-dashed border-brand-200 bg-white p-12 text-center text-muted">
+      <div className="rounded-2xl border border-dashed border-brand-200 bg-surface p-12 text-center text-muted">
         No hay tickets. Crea uno para comenzar.
       </div>
     );
   }
 
   return (
-    <ul className="divide-y divide-brand-100 overflow-hidden rounded-2xl border border-brand-100 bg-white shadow-sm">
+    <ul className="divide-y divide-border overflow-hidden rounded-2xl border border-border bg-surface shadow-sm">
       {tickets.map((t) => (
         <li key={t.id}>
           <Link
@@ -48,7 +48,7 @@ export function TicketList({ statusFilter }: { statusFilter?: string }) {
               <StatusBadge status={t.status} />
               <PriorityBadge priority={t.priority} />
               {t.ai_risk_level && (
-                <span className="rounded-full bg-purple-100 px-2 py-0.5 text-xs text-purple-800">
+                <span className="rounded-full bg-purple-100 px-2 py-0.5 text-xs text-purple-800 dark:bg-purple-900/40 dark:text-purple-200">
                   Riesgo: {t.ai_risk_level}
                 </span>
               )}

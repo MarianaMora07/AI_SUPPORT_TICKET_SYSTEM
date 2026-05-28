@@ -7,8 +7,8 @@ export default async function TicketDetailPage({ params }: { params: Promise<{ i
   const profile = await getSessionProfile();
   if (!profile) return null;
   return (
-    <div>
-      <Link href="/tickets" className="mb-4 inline-block text-sm text-indigo-600 hover:underline">← Volver</Link>
+    <div className="mx-auto max-w-6xl">
+      <Link href="/tickets" className="mb-4 inline-block text-sm font-medium text-brand-600 hover:underline">← Volver</Link>
       <TicketDetail ticketId={id} role={profile.role} />
     </div>
   );

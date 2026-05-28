@@ -54,7 +54,7 @@ export function LandingPage() {
 
           <div className="relative mx-auto max-w-6xl">
             <div className="mx-auto max-w-3xl text-center">
-              <p className="animate-fade-up mb-4 inline-flex items-center rounded-full border border-brand-200 bg-white px-4 py-1.5 text-sm font-medium text-brand-700 shadow-sm">
+              <p className="animate-fade-up mb-4 inline-flex items-center rounded-full border border-border bg-surface px-4 py-1.5 text-sm font-medium text-brand-700 shadow-sm">
                 Plataforma empresarial de soporte técnico
               </p>
               <h1 className="animate-fade-up animation-delay-100 text-4xl font-bold leading-tight tracking-tight text-brand-900 sm:text-5xl lg:text-6xl">
@@ -87,7 +87,7 @@ export function LandingPage() {
               ].map((stat) => (
                 <div
                   key={stat.label}
-                  className="rounded-2xl border border-brand-100 bg-white/90 p-6 text-center shadow-lg shadow-brand-900/5 backdrop-blur transition hover:-translate-y-1 hover:shadow-xl"
+                  className="rounded-2xl border border-border bg-surface p-6 text-center shadow-lg shadow-brand-900/5 backdrop-blur transition hover:-translate-y-1 hover:shadow-xl"
                 >
                   <p className="text-3xl font-bold text-brand-600">{stat.value}</p>
                   <p className="mt-1 text-sm text-muted">{stat.label}</p>
@@ -98,9 +98,12 @@ export function LandingPage() {
         </section>
 
         {/* Features */}
-        <section id="caracteristicas" className="border-y border-brand-100 bg-white px-4 py-20 sm:px-6">
+        <section id="caracteristicas" className="border-y border-border bg-surface px-4 py-20 sm:px-6">
           <div className="mx-auto max-w-6xl">
             <div className="mb-12 text-center">
+              <p className="mb-3 text-xs font-semibold uppercase tracking-[0.2em] text-brand-600">
+                Módulos del sistema
+              </p>
               <h2 className="text-3xl font-bold text-brand-900">¿Qué ofrece el sistema?</h2>
               <p className="mx-auto mt-3 max-w-2xl text-muted">
                 Diseñado para equipos de TI y soporte que necesitan trazabilidad, velocidad y
@@ -111,7 +114,7 @@ export function LandingPage() {
               {features.map((f, i) => (
                 <article
                   key={f.title}
-                  className="group rounded-2xl border border-brand-100 bg-brand-50/50 p-6 transition hover:border-brand-300 hover:bg-white hover:shadow-lg hover:shadow-brand-600/10"
+                  className="group rounded-2xl border border-border bg-surface p-6 transition hover:border-brand-300 hover:bg-brand-50/50 hover:shadow-lg hover:shadow-brand-600/10"
                   style={{ animationDelay: `${i * 80}ms` }}
                 >
                   <span className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-brand-100 text-2xl transition group-hover:scale-110">
@@ -129,6 +132,10 @@ export function LandingPage() {
         <section id="como-funciona" className="px-4 py-20 sm:px-6">
           <div className="mx-auto max-w-6xl">
             <h2 className="mb-12 text-center text-3xl font-bold text-brand-900">Cómo funciona</h2>
+            <p className="mx-auto mb-10 max-w-2xl text-center text-sm text-muted">
+              Flujo operativo para que cada módulo se entienda claramente: acceso, gestión de tickets y
+              automatización.
+            </p>
             <div className="grid gap-8 md:grid-cols-3">
               {steps.map((s) => (
                 <div key={s.step} className="relative text-center">
@@ -144,18 +151,21 @@ export function LandingPage() {
         </section>
 
         {/* Roles */}
-        <section id="roles" className="bg-white px-4 py-20 sm:px-6">
+        <section id="roles" className="bg-surface px-4 py-20 sm:px-6">
           <div className="mx-auto max-w-6xl">
             <h2 className="mb-12 text-center text-3xl font-bold text-brand-900">
               Pensado para cada rol
             </h2>
+            <p className="mx-auto mb-10 max-w-2xl text-center text-sm text-muted">
+              Cada perfil ve solo la información que necesita y entiende su responsabilidad dentro del proceso.
+            </p>
             <div className="grid gap-6 md:grid-cols-3">
               {roles.map((r) => (
                 <div
                   key={r.name}
-                  className="rounded-2xl border border-brand-200 bg-gradient-to-b from-brand-50 to-white p-6"
+                  className="rounded-2xl border border-brand-200 bg-gradient-to-b from-brand-50 to-surface p-6"
                 >
-                  <h3 className="text-lg font-semibold text-brand-700">{r.name}</h3>
+                  <h3 className="text-lg font-semibold text-brand-800">{r.name}</h3>
                   <p className="mt-2 text-sm text-muted">{r.desc}</p>
                 </div>
               ))}
@@ -164,17 +174,24 @@ export function LandingPage() {
         </section>
 
         {/* CTA */}
-        <section className="px-4 pb-24 sm:px-6">
-          <div className="mx-auto max-w-4xl overflow-hidden rounded-3xl bg-gradient-to-br from-brand-600 to-brand-800 px-8 py-14 text-center text-white shadow-2xl shadow-brand-700/30">
+        <section className="px-4 pb-10 sm:px-6">
+          <div className="mx-auto mt-5 max-w-4xl overflow-hidden rounded-3xl bg-gradient-to-br from-[#23436f] to-[#0f2744] px-8 py-14 text-center text-white shadow-2xl shadow-slate-900/35">
             <h2 className="text-2xl font-bold sm:text-3xl">¿Listo para empezar?</h2>
             <p className="mx-auto mt-3 max-w-lg text-blue-100">
               Accede con tu cuenta o regístrate para reportar tu primer ticket en minutos.
             </p>
             <div className="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row">
-              <ButtonLink href="/login" variant="outline" className="min-w-[160px] border-white text-white">
+              <ButtonLink
+                href="/login"
+                variant="outline"
+                className="min-w-[160px] border-blue-100 text-white hover:bg-white/15"
+              >
                 Iniciar sesión
               </ButtonLink>
-              <ButtonLink href="/register" variant="light" className="min-w-[160px]">
+              <ButtonLink
+                href="/register"
+                className="min-w-[160px] bg-white text-slate-900 hover:bg-blue-50"
+              >
                 Registrarse gratis
               </ButtonLink>
             </div>

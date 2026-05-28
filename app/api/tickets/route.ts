@@ -3,6 +3,7 @@ import { createClient } from '@/src/lib/supabase/server';
 import { jsonOk, jsonError } from '@/src/lib/api-response';
 import { getSessionProfile } from '@/src/lib/auth';
 import { triggerN8nWebhook } from '@/src/lib/n8n';
+import { recordTicketCreatedNotifications } from '@/src/services/notificationService';
 import type { Ticket, TicketPriority } from '@/src/types/database';
 
 const createSchema = z.object({
@@ -46,7 +47,7 @@ export async function POST(request: Request) {
     .select('*, categories(name)')
     .single();
   if (error) return jsonError(error.message, 500);
-  await triggerN8nWebhook('N8N_WEBHOOK_TICKET_CREATED', {
+  const n8nResult = await triggerN8nWebhook('N8N_WEBHOOK_TICKET_CREATED', {
     event: 'ticket.created',
     ticketId: data.id,
     title: data.title,
@@ -54,6 +55,13 @@ export async function POST(request: Request) {
     userName: profile.full_name,
     status: data.status,
     createdAt: data.created_at,
+  });
+  await recordTicketCreatedNotifications({
+    ticketId: data.id,
+    ticketTitle: data.title,
+    ownerId: profile.id,
+    event: 'ticket.created',
+    n8nResult,
   });
   return jsonOk(data, 201);
 }

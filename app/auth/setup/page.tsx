@@ -29,7 +29,7 @@ export default function AuthSetupPage() {
 
   return (
     <div className="flex min-h-full flex-1 items-center justify-center bg-mesh px-4">
-      <div className="max-w-md rounded-2xl border border-brand-100 bg-white p-8 text-center shadow-lg shadow-brand-900/5">
+      <div className="max-w-md rounded-2xl border border-border bg-surface p-8 text-center shadow-lg shadow-brand-900/5">
         <p className={failed ? 'text-red-600' : 'text-muted'}>{message}</p>
         {failed && (
           <Link href="/login" className="mt-4 inline-block font-medium text-brand-600 hover:text-brand-700 hover:underline">

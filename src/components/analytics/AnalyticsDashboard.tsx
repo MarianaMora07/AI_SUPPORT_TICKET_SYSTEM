@@ -23,7 +23,7 @@ export function AnalyticsDashboard() {
       .finally(() => setLoading(false));
   }, []);
 
-  if (loading) return <p>Cargando métricas…</p>;
+  if (loading) return <p className="text-muted">Cargando métricas…</p>;
   if (!data || !('total' in data)) return <p>No se pudieron cargar las métricas.</p>;
 
   return (
@@ -37,7 +37,8 @@ export function AnalyticsDashboard() {
       <MetricCard label="Creados (7 días)" value={data.createdLast7Days} />
 
       <div className="grid gap-6 md:grid-cols-2">
-        <div className="rounded-2xl border border-brand-100 bg-white p-6 shadow-sm">
+        <div className="rounded-2xl border border-border bg-surface p-6 shadow-sm">
+          <p className="mb-2 text-xs font-semibold uppercase tracking-[0.15em] text-brand-600">Distribución</p>
           <h2 className="mb-4 font-semibold text-brand-900">Por estado</h2>
           <ul className="space-y-2 text-sm">
             {Object.entries(data.byStatus).map(([k, v]) => (
@@ -48,7 +49,8 @@ export function AnalyticsDashboard() {
             ))}
           </ul>
         </div>
-        <div className="rounded-2xl border border-brand-100 bg-white p-6 shadow-sm">
+        <div className="rounded-2xl border border-border bg-surface p-6 shadow-sm">
+          <p className="mb-2 text-xs font-semibold uppercase tracking-[0.15em] text-brand-600">Carga operativa</p>
           <h2 className="mb-4 font-semibold text-brand-900">Por prioridad</h2>
           <ul className="space-y-2 text-sm">
             {Object.entries(data.byPriority).map(([k, v]) => (
@@ -66,8 +68,8 @@ export function AnalyticsDashboard() {
 
 function MetricCard({ label, value }: { label: string; value: string | number }) {
   return (
-    <div className="rounded-2xl border border-brand-100 bg-white p-6 shadow-sm transition hover:shadow-md">
-      <p className="text-sm text-muted">{label}</p>
+    <div className="rounded-2xl border border-border bg-surface p-6 shadow-sm transition hover:shadow-md">
+      <p className="text-xs font-semibold uppercase tracking-[0.12em] text-brand-600">{label}</p>
       <p className="mt-1 text-3xl font-bold text-brand-600">{value}</p>
     </div>
   );
