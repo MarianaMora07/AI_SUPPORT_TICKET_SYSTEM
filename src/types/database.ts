@@ -34,6 +34,7 @@ export interface Ticket {
   created_at: string;
   updated_at: string;
   categories?: Category | null;
+  users?: Pick<User, 'full_name' | 'email'> | null;
 }
 
 export interface Comment {

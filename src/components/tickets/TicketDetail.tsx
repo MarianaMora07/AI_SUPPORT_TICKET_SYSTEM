@@ -50,6 +50,12 @@ const formatAiSuggestions = (suggestions: unknown): string => {
   return String(suggestions);
 };
 
+function ticketCreatorLabel(ticket: Ticket): string | null {
+  const creator = ticket.users;
+  if (!creator) return null;
+  return creator.full_name?.trim() || creator.email || null;
+}
+
 export function TicketDetail({
   ticketId,
   role,
@@ -208,6 +214,8 @@ async function runAiAnalysis(applyPriority: boolean) {
   if (loading) return <p className="text-muted">Cargando…</p>;
   if (!ticket) return <p className="text-red-600">Ticket no encontrado</p>;
 
+  const creatorLabel = ticketCreatorLabel(ticket);
+
   return (
     <div className="grid gap-8 lg:grid-cols-3">
       <div className="space-y-6 lg:col-span-2">
@@ -219,6 +227,12 @@ async function runAiAnalysis(applyPriority: boolean) {
           <h1 className="text-2xl font-bold text-brand-900">
             {ticket.title}
           </h1>
+          {creatorLabel && (
+            <p className="mt-2 text-sm text-muted">
+              Creado por{" "}
+              <span className="font-medium text-brand-900">{creatorLabel}</span>
+            </p>
+          )}
           <p className="mt-4 whitespace-pre-wrap text-muted">
             {ticket.description}
           </p>

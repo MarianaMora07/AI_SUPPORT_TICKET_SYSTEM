@@ -5,6 +5,8 @@ import { getSessionProfile, canAccessAgent } from '@/src/lib/auth';
 import { triggerN8nWebhook } from '@/src/lib/n8n';
 import { recordHighPriorityNotifications } from '@/src/services/notificationService';
 
+const TICKET_DETAIL_SELECT = '*, categories(id, name), users!user_id(full_name, email)';
+
 const updateSchema = z.object({
   status: z.enum(['Open', 'In Progress', 'Resolved']).optional(),
   priority: z.enum(['Low', 'Medium', 'High', 'Urgent']).optional(),
@@ -21,7 +23,7 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
   const profile = await getSessionProfile();
   if (!profile) return jsonError('No autorizado', 401);
   const supabase = await createClient();
-  const { data, error } = await supabase.from('tickets').select('*, categories(id, name)').eq('id', id).single();
+  const { data, error } = await supabase.from('tickets').select(TICKET_DETAIL_SELECT).eq('id', id).single();
   if (error || !data) return jsonError('Ticket no encontrado', 404);
   return jsonOk(data);
 }
@@ -37,7 +39,12 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
   if (!existing) return jsonError('Ticket no encontrado', 404);
   const isAgent = canAccessAgent(profile.role);
   if (!isAgent && existing.user_id !== profile.id) return jsonError('Sin permiso', 403);
-  const { data, error } = await supabase.from('tickets').update(parsed.data).eq('id', id).select('*').single();
+  const { data, error } = await supabase
+    .from('tickets')
+    .update(parsed.data)
+    .eq('id', id)
+    .select(TICKET_DETAIL_SELECT)
+    .single();
   if (error) return jsonError(error.message, 500);
   const priority = parsed.data.priority ?? data.priority;
   const risk = parsed.data.ai_risk_level ?? data.ai_risk_level;
