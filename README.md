@@ -14,6 +14,7 @@ npm run dev
 Documentación:
 
 - [docs/SETUP.md](docs/SETUP.md) — entorno local
+- [docs/REQUISITOS_TRAZABILIDAD.md](docs/REQUISITOS_TRAZABILIDAD.md) — requisito por requisito (PDF → código)
 - [docs/N8N_WORKFLOWS.md](docs/N8N_WORKFLOWS.md) — email, Slack, reporte diario
 - [docs/VERCEL_DEPLOY.md](docs/VERCEL_DEPLOY.md) — producción
 - [docs/DEMO_SCRIPT.md](docs/DEMO_SCRIPT.md) — demo final
