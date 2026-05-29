@@ -4,15 +4,14 @@ import { jsonOk, jsonError } from '@/src/lib/api-response';
 import { getSessionProfile } from '@/src/lib/auth';
 import { triggerN8nWebhook } from '@/src/lib/n8n';
 import { recordTicketCreatedNotifications } from '@/src/services/notificationService';
-import type { Ticket, TicketPriority } from '@/src/types/database';
+import type { Ticket } from '@/src/types/database';
+import { sortTicketsByPriority } from '@/src/lib/ticket-sort';
 
 const createSchema = z.object({
   title: z.string().min(1),
   description: z.string().min(1),
   category_id: z.string().uuid(),
 });
-
-const PRIORITY_ORDER: Record<TicketPriority, number> = { Urgent: 0, High: 1, Medium: 2, Low: 3 };
 
 export async function GET(request: Request) {
   const profile = await getSessionProfile();
@@ -24,8 +23,7 @@ export async function GET(request: Request) {
   if (status) query = query.eq('status', status);
   const { data, error } = await query;
   if (error) return jsonError(error.message, 500);
-  const sorted = [...(data as Ticket[])].sort((a, b) => PRIORITY_ORDER[a.priority] - PRIORITY_ORDER[b.priority]);
-  return jsonOk(sorted);
+  return jsonOk(sortTicketsByPriority(data as Ticket[]));
 }
 
 export async function POST(request: Request) {

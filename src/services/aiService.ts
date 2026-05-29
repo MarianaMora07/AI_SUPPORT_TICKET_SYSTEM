@@ -187,5 +187,6 @@ export async function analyzeTicket(input: {
 export function mapRiskToPriority(risk: AiAnalysisResult['riskLevel']): 'Low' | 'Medium' | 'High' | 'Urgent' {
   if (risk === 'high') return 'Urgent';
   if (risk === 'medium') return 'High';
+  if (risk === 'low') return 'Low';
   return 'Medium';
 }

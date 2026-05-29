@@ -1,5 +1,8 @@
 @import "tailwindcss";
 
+/* Align dark: utilities with the .dark class toggle (not OS prefers-color-scheme). */
+@custom-variant dark (&:where(.dark, .dark *));
+
 :root {
   --background: #f0f6fc;
   --foreground: #0f2744;

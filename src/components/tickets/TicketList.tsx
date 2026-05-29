@@ -2,8 +2,9 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { StatusBadge, PriorityBadge } from '@/src/components/ui/Badge';
+import { StatusBadge, PriorityBadge, RiskBadge } from '@/src/components/ui/Badge';
 import type { Ticket } from '@/src/types/database';
+import { sortTicketsByPriority } from '@/src/lib/ticket-sort';
 
 export function TicketList({ statusFilter }: { statusFilter?: string }) {
   const [tickets, setTickets] = useState<Ticket[]>([]);
@@ -16,7 +17,8 @@ export function TicketList({ statusFilter }: { statusFilter?: string }) {
       .then((r) => r.json())
       .then((data) => {
         if (data.error) setError(data.error);
-        else setTickets(data);
+        else if (Array.isArray(data)) setTickets(sortTicketsByPriority(data as Ticket[]));
+        else setError('Respuesta inválida del servidor');
       })
       .catch(() => setError('Error al cargar tickets'))
       .finally(() => setLoading(false));
@@ -38,20 +40,16 @@ export function TicketList({ statusFilter }: { statusFilter?: string }) {
         <li key={t.id}>
           <Link
             href={`/tickets/${t.id}`}
-            className="flex flex-col gap-2 px-4 py-4 transition hover:bg-brand-50 sm:flex-row sm:items-center sm:justify-between"
+            className="flex flex-col gap-2 px-4 py-4 transition hover:bg-brand-50"
           >
             <div>
               <p className="font-medium text-brand-900">{t.title}</p>
               <p className="mt-1 line-clamp-1 text-sm text-muted">{t.description}</p>
             </div>
-            <div className="flex flex-wrap items-center gap-2">
+            <div className="flex flex-wrap items-center justify-start gap-2">
               <StatusBadge status={t.status} />
               <PriorityBadge priority={t.priority} />
-              {t.ai_risk_level && (
-                <span className="rounded-full bg-purple-100 px-2 py-0.5 text-xs text-purple-800 dark:bg-purple-900/40 dark:text-purple-200">
-                  Riesgo: {t.ai_risk_level}
-                </span>
-              )}
+              {t.ai_risk_level && <RiskBadge level={t.ai_risk_level} />}
             </div>
           </Link>
         </li>
