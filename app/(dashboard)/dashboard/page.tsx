@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { getSessionProfile } from '@/src/lib/auth';
+import { getSessionProfile, canAccessAgent } from '@/src/lib/auth';
 import { createClient } from '@/src/lib/supabase/server';
 import { ButtonLink } from '@/src/components/ui/Button';
 
@@ -10,6 +10,8 @@ export default async function DashboardPage() {
   let query = supabase.from('tickets').select('id', { count: 'exact', head: true });
   if (profile.role === 'User') query = query.eq('user_id', profile.id);
   const { count } = await query;
+
+  const isAgent = canAccessAgent(profile.role);
 
   return (
     <div className="animate-fade-up">
@@ -46,13 +48,13 @@ export default async function DashboardPage() {
           </Link>
         )}
 
-        {(profile.role === 'Admin' || profile.role === 'Agent') && (
+        {isAgent && (
           <Link
             href="/analytics"
             className="group rounded-2xl border border-border bg-surface p-6 shadow-sm transition hover:border-brand-200 hover:shadow-md"
           >
             <p className="font-semibold text-brand-800">Métricas →</p>
-            <p className="mt-1 text-sm text-muted">Resumen y estadísticas</p>
+            <p className="mt-1 text-sm text-muted">Resumen y estadísticas SLA</p>
           </Link>
         )}
       </div>
@@ -60,7 +62,8 @@ export default async function DashboardPage() {
       {profile.role === 'User' && (
         <div className="mt-8 rounded-2xl border border-border bg-surface p-6">
           <p className="text-sm text-muted">
-            ¿Necesitas ayuda? Crea un ticket y recibirás confirmación por correo.
+            Recibirás alertas en la barra superior cuando cambie el estado de tu ticket
+            o el equipo de soporte responda en tus solicitudes.
           </p>
           <ButtonLink href="/tickets/new" className="mt-4">
             Crear ticket

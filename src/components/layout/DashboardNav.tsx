@@ -7,6 +7,8 @@ import type { UserRole } from '@/src/types/database';
 import { Button } from '@/src/components/ui/Button';
 import { Logo } from '@/src/components/layout/Logo';
 import { ThemeToggle } from '@/src/components/layout/ThemeToggle';
+import { NotificationProvider } from '@/src/components/notifications/NotificationProvider';
+import { AlertsDropdown } from '@/src/components/alerts/AlertsDropdown';
 
 const links: { href: string; label: string; roles?: UserRole[] }[] = [
   { href: '/dashboard', label: 'Inicio' },
@@ -15,6 +17,7 @@ const links: { href: string; label: string; roles?: UserRole[] }[] = [
   { href: '/analytics', label: 'Métricas', roles: ['Admin', 'Agent'] },
   { href: '/settings', label: 'Perfil' },
   { href: '/admin/users', label: 'Usuarios', roles: ['Admin'] },
+  { href: '/admin/categories', label: 'SLA categorías', roles: ['Admin'] },
 ];
 
 export function DashboardNav({
@@ -61,6 +64,8 @@ export function DashboardNav({
           </nav>
         </div>
         <div className="flex items-center gap-3">
+          <AlertsDropdown role={role} />
+          <NotificationProvider />
           <ThemeToggle className="hidden sm:inline-flex" />
           <span className="hidden rounded-full bg-brand-50 px-3 py-1 text-xs font-medium text-brand-800 sm:inline">
             {fullName ?? 'Usuario'} · {role}

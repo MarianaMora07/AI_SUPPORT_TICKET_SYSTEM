@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { StatusBadge, PriorityBadge } from "@/src/components/ui/Badge";
+import { StatusBadge, PriorityBadge, RiskBadge, SlaBadge, AiPendingBadge } from "@/src/components/ui/Badge";
 import { Button } from "@/src/components/ui/Button";
 import { Label, Select, Textarea } from "@/src/components/ui/Input";
 import type {
@@ -12,6 +12,13 @@ import type {
   UserRole,
 } from "@/src/types/database";
 import { readJsonResponse } from "@/src/lib/fetch-json";
+import {
+  getSlaStatus,
+  formatSlaRemaining,
+  computeResolutionSlaDays,
+  DEFAULT_CATEGORY_SLA_DAYS,
+} from "@/src/lib/sla";
+import { Modal } from "@/src/components/ui/Modal";
 
 const ticketCommentsApi = (ticketId: string) => `/api/ticket-comments/${ticketId}`;
 
@@ -56,6 +63,24 @@ function ticketCreatorLabel(ticket: Ticket): string | null {
   return creator.full_name?.trim() || creator.email || null;
 }
 
+function formatDate(iso: string): string {
+  return new Date(iso).toLocaleString('es-MX', { dateStyle: 'medium', timeStyle: 'short' });
+}
+
+function isPriorityPending(ticket: Ticket): boolean {
+  if (ticket.ai_priority_assigned_at) return false;
+  const ageMs = Date.now() - new Date(ticket.created_at).getTime();
+  return ageMs < 2 * 60 * 1000;
+}
+
+function categorySlaDays(ticket: Ticket): number {
+  const cat = ticket.categories;
+  if (cat && typeof cat === 'object' && 'resolution_sla_days' in cat) {
+    return (cat as { resolution_sla_days?: number }).resolution_sla_days ?? DEFAULT_CATEGORY_SLA_DAYS;
+  }
+  return DEFAULT_CATEGORY_SLA_DAYS;
+}
+
 export function TicketDetail({
   ticketId,
   role,
@@ -71,6 +96,7 @@ export function TicketDetail({
   const [aiLoading, setAiLoading] = useState(false);
   const [suggestionDraft, setSuggestionDraft] = useState("");
   const [error, setError] = useState("");
+  const [actionModal, setActionModal] = useState<{ title: string; message: string } | null>(null);
 
   const isAgent = role === "Agent" || role === "Admin";
 
@@ -116,6 +142,11 @@ export function TicketDetail({
   useEffect(() => {
     const timer = setTimeout(() => {
       load({ syncSuggestion: true });
+      void fetch('/api/notifications', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ticketId }),
+      });
     }, 0);
 
     const interval = setInterval(() => load(), 15000);
@@ -124,7 +155,7 @@ export function TicketDetail({
       clearTimeout(timer);
       clearInterval(interval);
     };
-  }, [load]);
+  }, [load, ticketId]);
 
   async function updateTicket(patch: Partial<Ticket>) {
     const res = await fetch(`/api/tickets/${ticketId}`, {
@@ -133,8 +164,15 @@ export function TicketDetail({
       body: JSON.stringify(patch),
     });
     const data = await readJsonResponse<Ticket | { error?: string }>(res);
-    if (res.ok && isTicket(data)) setTicket(data);
-    else setError(isApiError(data) ? data.error : `Error al actualizar (${res.status})`);
+    if (res.ok && isTicket(data)) {
+      setTicket(data);
+      if (isAgent && patch.status && patch.status !== ticket?.status) {
+        setActionModal({
+          title: "Estado actualizado",
+          message: `El ticket pasó a "${patch.status}". El usuario fue notificado del cambio.`,
+        });
+      }
+    } else setError(isApiError(data) ? data.error : `Error al actualizar (${res.status})`);
   }
 
   async function addComment() {
@@ -144,9 +182,19 @@ export function TicketDetail({
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ message, is_internal: isInternal }),
     });
+    const data = await readJsonResponse<{ alert?: { message: string; type: string } | null; error?: string }>(res);
     if (res.ok) {
       setMessage("");
       load();
+      if (data?.alert?.message) {
+        setActionModal({
+          title:
+            data.alert.type === 'comment_on_resolved'
+              ? 'Mensaje en ticket resuelto'
+              : 'Respuesta enviada',
+          message: data.alert.message,
+        });
+      }
     }
   }
 
@@ -215,6 +263,12 @@ async function runAiAnalysis(applyPriority: boolean) {
   if (!ticket) return <p className="text-red-600">Ticket no encontrado</p>;
 
   const creatorLabel = ticketCreatorLabel(ticket);
+  const slaStatus = getSlaStatus(ticket);
+  const slaDays = computeResolutionSlaDays(categorySlaDays(ticket), ticket.ai_risk_level);
+  const categoryName =
+    ticket.categories && typeof ticket.categories === 'object' && 'name' in ticket.categories
+      ? (ticket.categories as { name: string }).name
+      : null;
 
   return (
     <div className="grid gap-8 lg:grid-cols-3">
@@ -223,6 +277,11 @@ async function runAiAnalysis(applyPriority: boolean) {
           <div className="mb-4 flex flex-wrap items-center gap-2">
             <StatusBadge status={ticket.status} />
             <PriorityBadge priority={ticket.priority} />
+            {isPriorityPending(ticket) && (
+              <AiPendingBadge label="Asignando prioridad IA…" />
+            )}
+            {ticket.ai_risk_level && <RiskBadge level={ticket.ai_risk_level} />}
+            {ticket.sla_deadline && <SlaBadge status={slaStatus} />}
           </div>
           <h1 className="text-2xl font-bold text-brand-900">
             {ticket.title}
@@ -231,7 +290,15 @@ async function runAiAnalysis(applyPriority: boolean) {
             <p className="mt-2 text-sm text-muted">
               Creado por{" "}
               <span className="font-medium text-brand-900">{creatorLabel}</span>
+              {" · "}
+              {formatDate(ticket.created_at)}
             </p>
+          )}
+          {!creatorLabel && (
+            <p className="mt-2 text-sm text-muted">Creado: {formatDate(ticket.created_at)}</p>
+          )}
+          {categoryName && (
+            <p className="mt-1 text-sm text-muted">Categoría: {categoryName}</p>
           )}
           <p className="mt-4 whitespace-pre-wrap text-muted">
             {ticket.description}
@@ -320,6 +387,39 @@ async function runAiAnalysis(applyPriority: boolean) {
       </div>
 
       <div className="space-y-4">
+        <div className="rounded-2xl border border-border bg-surface p-4 shadow-sm">
+          <h2 className="mb-3 font-semibold text-brand-900">SLA de resolución</h2>
+          <dl className="space-y-2 text-sm">
+            <div className="flex justify-between gap-2">
+              <dt className="text-muted">Plazo efectivo</dt>
+              <dd className="font-medium">{slaDays} días</dd>
+            </div>
+            {ticket.sla_deadline && (
+              <div className="flex justify-between gap-2">
+                <dt className="text-muted">Fecha límite</dt>
+                <dd className="font-medium">{formatDate(ticket.sla_deadline)}</dd>
+              </div>
+            )}
+            {ticket.sla_deadline && (
+              <div className="flex justify-between gap-2">
+                <dt className="text-muted">Tiempo restante</dt>
+                <dd className="font-medium">{formatSlaRemaining(ticket)}</dd>
+              </div>
+            )}
+            {ticket.resolved_at && (
+              <div className="flex justify-between gap-2">
+                <dt className="text-muted">Resuelto</dt>
+                <dd className="font-medium">{formatDate(ticket.resolved_at)}</dd>
+              </div>
+            )}
+          </dl>
+          {!ticket.ai_risk_level && ticket.status !== 'Resolved' && (
+            <p className="mt-3 rounded-lg bg-amber-50 p-2 text-xs text-amber-900">
+              SLA provisional (pendiente análisis de riesgo por un agente).
+            </p>
+          )}
+        </div>
+
         {error && (
           <p className="rounded-lg bg-red-50 p-3 text-sm text-red-700">
             {error}
@@ -403,6 +503,14 @@ async function runAiAnalysis(applyPriority: boolean) {
           </div>
         )}
       </div>
+
+      <Modal
+        open={!!actionModal}
+        onClose={() => setActionModal(null)}
+        title={actionModal?.title ?? ''}
+      >
+        <p>{actionModal?.message}</p>
+      </Modal>
     </div>
   );
 }

@@ -2,6 +2,8 @@ import { z } from 'zod';
 import { createClient } from '@/src/lib/supabase/server';
 import { jsonOk, jsonError } from '@/src/lib/api-response';
 import { getSessionProfile, canAccessAgent } from '@/src/lib/auth';
+import { recordCommentNotifications } from '@/src/services/notificationService';
+import type { TicketStatus } from '@/src/types/database';
 
 const commentSchema = z.object({
   message: z.string().min(1),
@@ -38,7 +40,15 @@ export async function POST(
   if (!parsed.success) return jsonError('Mensaje requerido', 400);
   const isInternal = parsed.data.is_internal ?? false;
   if (isInternal && !canAccessAgent(profile.role)) return jsonError('Sin permiso', 403);
+
   const supabase = await createClient();
+  const { data: ticket } = await supabase
+    .from('tickets')
+    .select('id, title, status, user_id')
+    .eq('id', ticketId)
+    .single();
+  if (!ticket) return jsonError('Ticket no encontrado', 404);
+
   const { data, error } = await supabase
     .from('comments')
     .insert({
@@ -50,5 +60,35 @@ export async function POST(
     .select('*, users(full_name, email)')
     .single();
   if (error) return jsonError(error.message, 500);
-  return jsonOk(data, 201);
+
+  void recordCommentNotifications({
+    ticketId,
+    ticketTitle: ticket.title,
+    ticketStatus: ticket.status as TicketStatus,
+    ownerId: ticket.user_id,
+    commenterId: profile.id,
+    commenterName: profile.full_name ?? profile.email ?? 'Usuario',
+    commenterIsAgent: canAccessAgent(profile.role),
+    messagePreview: parsed.data.message,
+    isInternal,
+  });
+
+  return jsonOk(
+    {
+      ...data,
+      alert:
+        ticket.status === 'Resolved' && canAccessAgent(profile.role)
+          ? {
+              type: 'comment_on_resolved',
+              message: `Mensaje enviado en ticket resuelto. El usuario recibirá una alerta.`,
+            }
+          : ticket.status === 'Resolved' && ticket.user_id === profile.id
+            ? {
+                type: 'user_reply_resolved',
+                message: `Tu respuesta fue enviada. El equipo de soporte fue notificado.`,
+              }
+            : null,
+    },
+    201
+  );
 }

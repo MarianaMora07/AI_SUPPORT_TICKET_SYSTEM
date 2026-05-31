@@ -3,9 +3,15 @@ import { createClient } from '@/src/lib/supabase/server';
 import { jsonOk, jsonError } from '@/src/lib/api-response';
 import { getSessionProfile, canAccessAgent } from '@/src/lib/auth';
 import { triggerN8nWebhook } from '@/src/lib/n8n';
-import { recordHighPriorityNotifications } from '@/src/services/notificationService';
+import {
+  recordHighPriorityNotifications,
+  recordStatusChangeNotification,
+  recordCommentNotifications,
+} from '@/src/services/notificationService';
+import type { TicketStatus } from '@/src/types/database';
 
-const TICKET_DETAIL_SELECT = '*, categories(id, name), users!user_id(full_name, email)';
+const TICKET_DETAIL_SELECT =
+  '*, categories(id, name, resolution_sla_days), users!user_id(full_name, email)';
 
 const updateSchema = z.object({
   status: z.enum(['Open', 'In Progress', 'Resolved']).optional(),
@@ -39,13 +45,34 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
   if (!existing) return jsonError('Ticket no encontrado', 404);
   const isAgent = canAccessAgent(profile.role);
   if (!isAgent && existing.user_id !== profile.id) return jsonError('Sin permiso', 403);
+
+  const patch: Record<string, unknown> = { ...parsed.data };
+
+  if (parsed.data.status === 'Resolved' && existing.status !== 'Resolved') {
+    patch.resolved_at = new Date().toISOString();
+  } else if (parsed.data.status && parsed.data.status !== 'Resolved' && existing.status === 'Resolved') {
+    patch.resolved_at = null;
+  }
+
   const { data, error } = await supabase
     .from('tickets')
-    .update(parsed.data)
+    .update(patch)
     .eq('id', id)
     .select(TICKET_DETAIL_SELECT)
     .single();
   if (error) return jsonError(error.message, 500);
+
+  if (isAgent && parsed.data.status && parsed.data.status !== existing.status) {
+    void recordStatusChangeNotification({
+      ticketId: id,
+      ticketTitle: data.title,
+      ownerId: data.user_id,
+      previousStatus: existing.status as TicketStatus,
+      newStatus: parsed.data.status,
+      changedByName: profile.full_name ?? profile.email ?? 'Agente',
+    });
+  }
+
   const priority = parsed.data.priority ?? data.priority;
   const risk = parsed.data.ai_risk_level ?? data.ai_risk_level;
   if (priority === 'High' || priority === 'Urgent' || risk === 'high') {

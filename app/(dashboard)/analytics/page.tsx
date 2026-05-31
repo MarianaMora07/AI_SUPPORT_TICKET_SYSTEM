@@ -8,7 +8,9 @@ export default async function AnalyticsPage() {
   return (
     <div>
       <h1 className="mb-2 text-2xl font-bold text-brand-900">Métricas</h1>
-      <p className="mb-8 text-sm text-muted">Performance del soporte (US-08)</p>
+      <p className="mb-8 text-sm text-muted">
+        Performance del soporte. Los avisos SLA y pendientes están en el icono de alerta de la barra superior.
+      </p>
       <AnalyticsDashboard />
     </div>
   );

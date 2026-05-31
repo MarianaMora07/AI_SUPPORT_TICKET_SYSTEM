@@ -8,6 +8,7 @@ CREATE TABLE public.categories (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     name VARCHAR(100) NOT NULL UNIQUE,
     description TEXT,
+    resolution_sla_days INTEGER NOT NULL DEFAULT 14 CHECK (resolution_sla_days > 0 AND resolution_sla_days <= 90),
     created_at TIMESTAMPTZ DEFAULT TIMEZONE('utc', NOW()) NOT NULL
 );
 
@@ -33,6 +34,10 @@ CREATE TABLE public.tickets (
     ai_suggestions TEXT,
     ai_risk_level VARCHAR(50),
     ai_sentiment VARCHAR(32),
+    sla_deadline TIMESTAMPTZ,
+    resolved_at TIMESTAMPTZ,
+    ai_priority_assigned_at TIMESTAMPTZ,
+    ai_analyzed_at TIMESTAMPTZ,
     created_at TIMESTAMPTZ DEFAULT TIMEZONE('utc', NOW()) NOT NULL,
     updated_at TIMESTAMPTZ DEFAULT TIMEZONE('utc', NOW()) NOT NULL
 );
@@ -51,6 +56,8 @@ CREATE TABLE public.notifications (
     user_id UUID REFERENCES public.users(id) ON DELETE CASCADE NOT NULL,
     ticket_id UUID REFERENCES public.tickets(id) ON DELETE CASCADE,
     message TEXT NOT NULL,
+    title VARCHAR(255),
+    kind VARCHAR(50) NOT NULL DEFAULT 'system',
     is_read BOOLEAN DEFAULT FALSE NOT NULL,
     created_at TIMESTAMPTZ DEFAULT TIMEZONE('utc', NOW()) NOT NULL
 );

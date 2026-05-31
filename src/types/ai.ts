@@ -115,6 +115,23 @@ export const aiAnalysisSchema = z.object({
 
 export type AiAnalysisResult = z.infer<typeof aiAnalysisSchema>;
 
+export const priorityAssignmentSchema = z.object({
+  priority: z.enum(['Low', 'Medium', 'High', 'Urgent']),
+  reasoning: z.string().optional(),
+});
+
+export type PriorityAssignmentResult = z.infer<typeof priorityAssignmentSchema>;
+
+/** Esquema Gemini para asignación automática de prioridad. */
+export const geminiPriorityResponseSchema = {
+  type: 'OBJECT',
+  properties: {
+    priority: { type: 'STRING', enum: ['Low', 'Medium', 'High', 'Urgent'] },
+    reasoning: { type: 'STRING', description: 'Breve justificación de la prioridad' },
+  },
+  required: ['priority'],
+} as const;
+
 /** Esquema para `responseSchema` de la API REST de Gemini. */
 export const geminiAiResponseSchema = {
   type: 'OBJECT',

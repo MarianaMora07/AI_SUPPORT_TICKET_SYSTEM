@@ -1,4 +1,5 @@
 import type { Ticket, TicketPriority } from '@/src/types/database';
+import { getSlaStatus, SLA_STATUS_ORDER } from '@/src/lib/sla';
 
 /** Menor valor = más prioritario (Urgent primero). */
 export const PRIORITY_ORDER: Record<TicketPriority, number> = {
@@ -25,11 +26,14 @@ function riskRank(risk: string | null | undefined): number {
 }
 
 /**
- * Cola de tickets: mayor prioridad primero (Urgent → Low).
- * Si empatan en prioridad, mayor riesgo IA (high → low) cuando hay clasificación.
- * Desempate final: más recientes primero.
+ * Cola de tickets: SLA urgente primero (vencido → advertencia → en tiempo).
+ * Luego prioridad (Urgent → Low), riesgo IA si hay clasificación, más recientes al final.
  */
 export function compareTicketsByPriority(a: Ticket, b: Ticket): number {
+  const slaA = SLA_STATUS_ORDER[getSlaStatus(a)];
+  const slaB = SLA_STATUS_ORDER[getSlaStatus(b)];
+  if (slaA !== slaB) return slaA - slaB;
+
   const byPriority = priorityRank(a.priority) - priorityRank(b.priority);
   if (byPriority !== 0) return byPriority;
 

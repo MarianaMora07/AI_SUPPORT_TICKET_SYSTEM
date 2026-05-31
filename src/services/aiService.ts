@@ -2,9 +2,13 @@ import OpenAI from 'openai';
 import {
   aiAnalysisSchema,
   geminiAiResponseSchema,
+  geminiPriorityResponseSchema,
   normalizeAiPayload,
+  priorityAssignmentSchema,
   type AiAnalysisResult,
+  type PriorityAssignmentResult,
 } from '../types/ai';
+import type { TicketPriority } from '../types/database';
 
 const OPENAI_MODEL = 'gpt-4o-mini';
 const ANTHROPIC_MODEL = 'claude-3-5-haiku-latest';
@@ -70,8 +74,46 @@ function parseAiJson(raw: string): AiAnalysisResult {
   return parsed.data;
 }
 
-// 🌟 NUEVA: Función para conectar con Gemini vía Fetch sin dependencias extra
-async function analyzeWithGemini(prompt: string) {
+function buildPriorityPrompt(input: {
+  title: string;
+  description: string;
+  categoryName?: string;
+}): string {
+  return `Evalúa la urgencia del ticket de soporte y responde ÚNICAMENTE con JSON válido:
+{ "priority": "Low"|"Medium"|"High"|"Urgent", "reasoning": "string breve" }
+
+Criterios de prioridad:
+- Urgent: afecta a muchos usuarios, caída de servidores, fallas críticas del negocio
+- High: incidente grave que impide trabajo importante a uno o varios usuarios
+- Medium: ralentiza el trabajo o fallas de herramientas secundarias
+- Low: dudas comunes, consultas individuales, pruebas o solicitudes no urgentes
+
+Título: ${input.title}
+Categoría: ${input.categoryName ?? 'N/A'}
+Descripción: ${input.description}`;
+}
+
+function parsePriorityJson(raw: string): PriorityAssignmentResult {
+  const firstBrace = raw.indexOf('{');
+  const lastBrace = raw.lastIndexOf('}');
+  let cleanJson = raw;
+  if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
+    cleanJson = raw.substring(firstBrace, lastBrace + 1);
+  }
+  let json: unknown;
+  try {
+    json = JSON.parse(cleanJson);
+  } catch {
+    throw new Error('La IA no devolvió JSON válido');
+  }
+  const parsed = priorityAssignmentSchema.safeParse(json);
+  if (!parsed.success) {
+    throw new Error('Formato de prioridad IA inválido');
+  }
+  return parsed.data;
+}
+
+async function callGemini(prompt: string, responseSchema: typeof geminiAiResponseSchema | typeof geminiPriorityResponseSchema) {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) throw new Error('Falta la variable GEMINI_API_KEY en el entorno');
 
@@ -79,28 +121,28 @@ async function analyzeWithGemini(prompt: string) {
     `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${apiKey}`,
     {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         contents: [{ parts: [{ text: prompt }] }],
         generationConfig: {
           responseMimeType: 'application/json',
-          responseSchema: geminiAiResponseSchema,
+          responseSchema,
         },
       }),
     }
   );
 
-  if (!res.ok) {
-    throw new Error(`Error de la API de Gemini: ${await res.text()}`);
-  }
+  if (!res.ok) throw new Error(`Error de la API de Gemini: ${await res.text()}`);
 
   const data = await res.json();
   const raw = data.candidates?.[0]?.content?.parts?.[0]?.text;
   if (!raw) throw new Error('Respuesta vacía de Gemini');
-
   return { raw, modelVersion: GEMINI_MODEL };
+}
+
+// 🌟 NUEVA: Función para conectar con Gemini vía Fetch sin dependencias extra
+async function analyzeWithGemini(prompt: string) {
+  return callGemini(prompt, geminiAiResponseSchema);
 }
 
 async function analyzeWithOpenAI(prompt: string) {
@@ -140,13 +182,7 @@ async function analyzeWithAnthropic(prompt: string) {
   return { raw, modelVersion: ANTHROPIC_MODEL };
 }
 
-export async function analyzeTicket(input: {
-  title: string;
-  description: string;
-  categoryName?: string;
-  comments: string[];
-}) {
-  const prompt = buildPrompt(input);
+async function runAiPrompt(prompt: string, mode: 'analysis' | 'priority') {
   const start = Date.now();
   const provider = (process.env.AI_PROVIDER ?? 'gemini').toLowerCase();
 
@@ -154,9 +190,12 @@ export async function analyzeTicket(input: {
   let modelVersion: string;
 
   try {
-    // 🌟 Enrutador corregido para soportar Gemini de forma nativa
     if (provider === 'gemini') {
-      ({ raw, modelVersion } = await analyzeWithGemini(prompt));
+      if (mode === 'priority') {
+        ({ raw, modelVersion } = await callGemini(prompt, geminiPriorityResponseSchema));
+      } else {
+        ({ raw, modelVersion } = await analyzeWithGemini(prompt));
+      }
     } else if (provider === 'anthropic') {
       ({ raw, modelVersion } = await analyzeWithAnthropic(prompt));
     } else {
@@ -164,10 +203,9 @@ export async function analyzeTicket(input: {
     }
   } catch (firstError) {
     const msg = firstError instanceof Error ? firstError.message : '';
-    
-    // Fallback: Si Gemini o OpenAI fallan por saturación o región, intentamos Claude si hay KEY
-    const isServiceFailure = msg.includes('503') || msg.includes('quota') || msg.includes('region') || msg.includes('demand');
-    
+    const isServiceFailure =
+      msg.includes('503') || msg.includes('quota') || msg.includes('region') || msg.includes('demand');
+
     if (provider !== 'anthropic' && isServiceFailure && process.env.ANTHROPIC_API_KEY) {
       console.warn(`⚠️ Proveedor ${provider} falló. Activando fallback de emergencia con Anthropic.`);
       ({ raw, modelVersion } = await analyzeWithAnthropic(prompt));
@@ -176,10 +214,46 @@ export async function analyzeTicket(input: {
     }
   }
 
+  return { raw, modelVersion, latencyMs: Date.now() - start };
+}
+
+export async function analyzeTicket(input: {
+  title: string;
+  description: string;
+  categoryName?: string;
+  comments: string[];
+}) {
+  const prompt = buildPrompt(input);
+  const { raw, modelVersion, latencyMs } = await runAiPrompt(prompt, 'analysis');
+
   return {
     result: parseAiJson(raw),
     prompt,
-    latencyMs: Date.now() - start,
+    latencyMs,
+    modelVersion,
+  };
+}
+
+export async function assignTicketPriority(input: {
+  title: string;
+  description: string;
+  categoryName?: string;
+}): Promise<{
+  priority: TicketPriority;
+  reasoning?: string;
+  prompt: string;
+  latencyMs: number;
+  modelVersion: string;
+}> {
+  const prompt = buildPriorityPrompt(input);
+  const { raw, modelVersion, latencyMs } = await runAiPrompt(prompt, 'priority');
+  const result = parsePriorityJson(raw);
+
+  return {
+    priority: result.priority,
+    reasoning: result.reasoning,
+    prompt,
+    latencyMs,
     modelVersion,
   };
 }
