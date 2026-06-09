@@ -120,6 +120,42 @@ html.dark {
   }
 }
 
+@keyframes slide-in-left {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes slide-out-left {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-100%);
+  }
+}
+
+@keyframes backdrop-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes backdrop-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
 @keyframes float {
   0%,
   100% {
@@ -136,6 +172,22 @@ html.dark {
 
 .animate-fade-in {
   animation: fade-in 0.5s ease-out forwards;
+}
+
+.animate-slide-in-left {
+  animation: slide-in-left 0.28s cubic-bezier(0.32, 0.72, 0, 1) forwards;
+}
+
+.animate-slide-out-left {
+  animation: slide-out-left 0.24s cubic-bezier(0.32, 0.72, 0, 1) forwards;
+}
+
+.animate-backdrop-in {
+  animation: backdrop-in 0.28s ease-out forwards;
+}
+
+.animate-backdrop-out {
+  animation: backdrop-out 0.24s ease-out forwards;
 }
 
 .animate-float {
