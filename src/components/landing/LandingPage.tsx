@@ -43,7 +43,7 @@ const roles = [
 
 export function LandingPage() {
   return (
-    <div className="flex min-h-full flex-col bg-mesh">
+    <div className="flex min-h-dvh w-full flex-col bg-mesh">
       <PublicHeader />
 
       <main className="flex-1">

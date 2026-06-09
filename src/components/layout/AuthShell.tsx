@@ -12,7 +12,7 @@ export function AuthShell({
   children: React.ReactNode;
 }) {
   return (
-    <div className="flex min-h-screen w-full">
+    <div className="flex min-h-dvh w-full">
       <aside className="relative hidden w-[44%] overflow-hidden bg-auth-panel lg:flex lg:flex-col lg:justify-between lg:p-12">
         <div className="absolute inset-0 opacity-20">
           <div className="absolute -left-20 -top-20 h-72 w-72 rounded-full bg-white/20 blur-3xl" />
@@ -54,7 +54,7 @@ export function AuthShell({
         <p className="relative z-10 text-sm text-blue-200/80">AI Support Ticket System</p>
       </aside>
 
-      <div className="flex min-h-screen flex-1 flex-col bg-mesh">
+      <div className="flex min-h-dvh flex-1 flex-col bg-mesh">
         <div className="hidden justify-end px-8 pt-6 lg:flex">
           <ThemeToggle />
         </div>
