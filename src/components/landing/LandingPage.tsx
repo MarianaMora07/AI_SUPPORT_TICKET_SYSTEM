@@ -43,36 +43,41 @@ const roles = [
 
 export function LandingPage() {
   return (
-    <div className="bg-mesh-page flex w-full flex-1 flex-col">
+    <div className="bg-mesh-page flex w-full max-w-full flex-1 flex-col overflow-x-hidden">
       <PublicHeader />
 
-      <main className="flex-1">
+      <main className="w-full max-w-full flex-1 overflow-x-hidden">
         {/* Hero */}
-        <section className="relative overflow-hidden px-4 pb-20 pt-12 sm:px-6 sm:pt-16 lg:pb-28">
-          <div className="pointer-events-none absolute right-0 top-0 h-96 w-96 rounded-full bg-brand-200/40 blur-3xl" />
-          <div className="pointer-events-none absolute -left-20 bottom-0 h-72 w-72 rounded-full bg-brand-300/30 blur-3xl" />
+        <section className="relative overflow-x-clip px-4 pb-20 pt-12 sm:px-6 sm:pt-16 lg:pb-28">
+          <div
+            aria-hidden
+            className="pointer-events-none absolute inset-0 overflow-hidden"
+          >
+            <div className="absolute -right-16 top-0 h-64 w-64 rounded-full bg-brand-200/40 blur-3xl md:-right-8 md:h-96 md:w-96" />
+            <div className="absolute -left-16 bottom-0 h-56 w-56 rounded-full bg-brand-300/30 blur-3xl md:-left-20 md:h-72 md:w-72" />
+          </div>
 
-          <div className="relative mx-auto max-w-6xl">
-            <div className="mx-auto max-w-3xl text-center">
-              <p className="animate-fade-up mb-4 inline-flex items-center rounded-full border border-border bg-surface px-4 py-1.5 text-sm font-medium text-brand-700 shadow-sm">
+          <div className="relative mx-auto w-full max-w-6xl">
+            <div className="mx-auto w-full max-w-3xl px-1 text-center">
+              <p className="animate-fade-up mx-auto mb-4 max-w-full rounded-full border border-border bg-surface px-4 py-1.5 text-sm font-medium text-brand-700 shadow-sm">
                 Plataforma empresarial de soporte técnico
               </p>
-              <h1 className="animate-fade-up animation-delay-100 text-4xl font-bold leading-tight tracking-tight text-brand-900 sm:text-5xl lg:text-6xl">
+              <h1 className="animate-fade-up animation-delay-100 text-balance break-words text-4xl font-bold leading-tight tracking-tight text-brand-900 sm:text-5xl lg:text-6xl">
                 Resuelve incidentes con{' '}
                 <span className="bg-gradient-to-r from-brand-600 to-brand-400 bg-clip-text text-transparent">
                   IA y automatización
                 </span>
               </h1>
-              <p className="animate-fade-up animation-delay-200 mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-muted">
+              <p className="animate-fade-up animation-delay-200 mx-auto mt-6 max-w-2xl text-pretty break-words text-lg leading-relaxed text-muted">
                 TicketSystem centraliza solicitudes de soporte, prioriza con inteligencia
                 artificial y mantiene informados a usuarios y equipos mediante flujos
                 automatizados en tiempo real.
               </p>
               <div className="animate-fade-up animation-delay-300 mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
-                <ButtonLink href="/login" variant="primary" className="min-w-[180px] px-8 py-3 text-base">
+                <ButtonLink href="/login" variant="primary" className="w-full max-w-xs px-8 py-3 text-base sm:min-w-[180px] sm:w-auto">
                   Iniciar sesión
                 </ButtonLink>
-                <ButtonLink href="/register" variant="secondary" className="min-w-[180px] px-8 py-3 text-base">
+                <ButtonLink href="/register" variant="secondary" className="w-full max-w-xs px-8 py-3 text-base sm:min-w-[180px] sm:w-auto">
                   Crear cuenta
                 </ButtonLink>
               </div>

@@ -41,10 +41,10 @@ export default function RootLayout({
   return (
     <html
       lang="es"
-      className={`${geistSans.variable} ${geistMono.variable} min-h-dvh antialiased`}
+      className={`${geistSans.variable} ${geistMono.variable} min-h-dvh w-full max-w-full overflow-x-hidden antialiased`}
       suppressHydrationWarning
     >
-      <body className="flex min-h-dvh flex-col overflow-x-clip">
+      <body className="flex min-h-dvh w-full max-w-full flex-col overflow-x-hidden">
         <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
         {children}
       </body>
