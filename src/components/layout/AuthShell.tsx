@@ -54,7 +54,7 @@ export function AuthShell({
         <p className="relative z-10 text-sm text-blue-200/80">AI Support Ticket System</p>
       </aside>
 
-      <div className="flex min-h-dvh flex-1 flex-col bg-mesh">
+      <div className="bg-mesh-page flex min-h-dvh flex-1 flex-col">
         <div className="hidden justify-end px-8 pt-6 lg:flex">
           <ThemeToggle />
         </div>

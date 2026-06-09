@@ -30,14 +30,14 @@ export function Modal({
   return (
     <dialog
       ref={dialogRef}
-      className="fixed inset-0 z-50 m-auto w-[min(100%,28rem)] max-h-[90vh] overflow-hidden rounded-2xl border border-border bg-surface p-0 shadow-2xl backdrop:bg-black/40"
+      className="fixed inset-0 z-50 m-auto w-[min(calc(100vw-2rem),28rem)] max-h-[90dvh] overflow-hidden rounded-2xl border border-border bg-surface p-0 shadow-2xl backdrop:bg-black/40"
       onClose={onClose}
     >
       <div className="border-b border-border px-5 py-4">
         <h2 className="text-lg font-semibold text-brand-900">{title}</h2>
       </div>
-      <div className="max-h-[60vh] overflow-y-auto px-5 py-4 text-sm text-muted">{children}</div>
-      <div className="flex justify-end gap-2 border-t border-border px-5 py-4">
+      <div className="max-h-[60dvh] overflow-y-auto px-5 py-4 text-sm text-muted break-words">{children}</div>
+      <div className="flex flex-col-reverse gap-2 border-t border-border px-5 py-4 sm:flex-row sm:justify-end">
         {footer ?? (
           <Button type="button" variant="secondary" onClick={onClose}>
             Cerrar

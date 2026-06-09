@@ -99,24 +99,38 @@ export function NotificationProvider() {
         </button>
 
         {openPanel && (
-          <div className="absolute right-0 top-full z-50 mt-2 w-80 overflow-hidden rounded-2xl border border-border bg-surface shadow-xl">
-            <div className="flex items-center justify-between border-b border-border px-4 py-3">
-              <p className="font-semibold text-brand-900">Notificaciones</p>
-              {unreadCount > 0 && (
-                <button type="button" className="text-xs text-brand-600 hover:underline" onClick={markAllRead}>
-                  Marcar todas leídas
-                </button>
-              )}
-            </div>
-            <ul className="max-h-80 overflow-y-auto">
-              {notifications.length === 0 && (
-                <li className="px-4 py-6 text-center text-sm text-muted">Sin alertas</li>
-              )}
-              {notifications.slice(0, 15).map((n) => (
-                <li key={n.id} className={`border-b border-border px-4 py-3 text-sm ${n.is_read ? 'opacity-60' : ''}`}>
-                  <p className="font-medium text-brand-900">{n.title ?? 'Notificación'}</p>
-                  <p className="mt-1 line-clamp-2 text-muted">{n.message}</p>
-                  <div className="mt-2 flex gap-2">
+          <>
+            <button
+              type="button"
+              className="fixed inset-0 z-40 bg-black/20 sm:hidden"
+              aria-label="Cerrar notificaciones"
+              onClick={() => setOpenPanel(false)}
+            />
+            <div className="fixed inset-x-4 top-[4.25rem] z-50 flex max-h-[min(28rem,calc(100dvh-5.5rem))] flex-col overflow-hidden rounded-2xl border border-border bg-surface shadow-xl sm:absolute sm:inset-x-auto sm:right-0 sm:top-full sm:mt-2 sm:max-h-none sm:w-80">
+              <div className="flex shrink-0 items-center justify-between gap-3 border-b border-border px-4 py-3">
+                <p className="font-semibold text-brand-900">Notificaciones</p>
+                {unreadCount > 0 && (
+                  <button
+                    type="button"
+                    className="shrink-0 text-xs text-brand-600 hover:underline"
+                    onClick={markAllRead}
+                  >
+                    Marcar todas leídas
+                  </button>
+                )}
+              </div>
+              <ul className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
+                {notifications.length === 0 && (
+                  <li className="px-4 py-6 text-center text-sm text-muted">Sin alertas</li>
+                )}
+                {notifications.slice(0, 15).map((n) => (
+                  <li
+                    key={n.id}
+                    className={`border-b border-border px-4 py-3 text-sm last:border-b-0 ${n.is_read ? 'opacity-60' : ''}`}
+                  >
+                    <p className="break-words font-medium text-brand-900">{n.title ?? 'Notificación'}</p>
+                    <p className="mt-1 break-words text-muted">{n.message}</p>
+                    <div className="mt-2 flex flex-wrap gap-2">
                     {n.ticket_id && (
                       <Link
                         href={`/tickets/${n.ticket_id}`}
@@ -136,6 +150,7 @@ export function NotificationProvider() {
               ))}
             </ul>
           </div>
+          </>
         )}
       </div>
 

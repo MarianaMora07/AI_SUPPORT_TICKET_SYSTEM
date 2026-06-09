@@ -27,15 +27,15 @@ function AlertsList({
     return <p className="px-4 py-6 text-center text-sm text-muted">{emptyLabel}</p>;
   }
   return (
-    <ul className="max-h-80 overflow-y-auto">
+    <ul className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
       {alerts.map((alert) => (
         <li key={alert.id} className="border-b border-border last:border-b-0">
           <Link
             href={alert.href}
             className={`block border-l-4 px-4 py-3 text-sm transition hover:bg-brand-50 ${severityStyles[alert.severity]}`}
           >
-            <p className="font-medium text-brand-900">{alert.title}</p>
-            <p className="mt-1 line-clamp-2 text-muted">{alert.message}</p>
+            <p className="break-words font-medium text-brand-900">{alert.title}</p>
+            <p className="mt-1 break-words text-muted">{alert.message}</p>
           </Link>
         </li>
       ))}
@@ -118,32 +118,40 @@ export function AlertsDropdown({ role }: { role: UserRole }) {
       </button>
 
       {open && (
-        <div className="absolute right-0 top-full z-50 mt-2 w-[min(100vw-2rem,22rem)] overflow-hidden rounded-2xl border border-border bg-surface shadow-xl">
-          <div className="border-b border-border px-4 py-3">
-            <p className="font-semibold text-brand-900">{panelTitle}</p>
-            {badgeCount > 0 && (
-              <p className="mt-1 text-xs text-muted">
-                {summary.critical > 0 && `${summary.critical} crítica${summary.critical !== 1 ? 's' : ''}`}
-                {summary.critical > 0 && summary.warning > 0 && ' · '}
-                {summary.warning > 0 && `${summary.warning} advertencia${summary.warning !== 1 ? 's' : ''}`}
-                {(summary.critical > 0 || summary.warning > 0) && summary.info > 0 && ' · '}
-                {summary.info > 0 && `${summary.info} pendiente${summary.info !== 1 ? 's' : ''}`}
-              </p>
+        <>
+          <button
+            type="button"
+            className="fixed inset-0 z-40 bg-black/20 sm:hidden"
+            aria-label="Cerrar avisos"
+            onClick={() => setOpen(false)}
+          />
+          <div className="fixed inset-x-4 top-[4.25rem] z-50 flex max-h-[min(28rem,calc(100dvh-5.5rem))] flex-col overflow-hidden rounded-2xl border border-border bg-surface shadow-xl sm:absolute sm:inset-x-auto sm:right-0 sm:top-full sm:mt-2 sm:max-h-none sm:w-80">
+            <div className="shrink-0 border-b border-border px-4 py-3">
+              <p className="font-semibold text-brand-900">{panelTitle}</p>
+              {badgeCount > 0 && (
+                <p className="mt-1 break-words text-xs text-muted">
+                  {summary.critical > 0 && `${summary.critical} crítica${summary.critical !== 1 ? 's' : ''}`}
+                  {summary.critical > 0 && summary.warning > 0 && ' · '}
+                  {summary.warning > 0 && `${summary.warning} advertencia${summary.warning !== 1 ? 's' : ''}`}
+                  {(summary.critical > 0 || summary.warning > 0) && summary.info > 0 && ' · '}
+                  {summary.info > 0 && `${summary.info} pendiente${summary.info !== 1 ? 's' : ''}`}
+                </p>
+              )}
+            </div>
+            <AlertsList alerts={alerts} loading={loading} emptyLabel={emptyLabel} />
+            {alerts.length > 0 && (
+              <div className="shrink-0 border-t border-border px-4 py-2">
+                <Link
+                  href="/tickets?sla=breached"
+                  className="text-xs font-medium text-brand-600 hover:underline"
+                  onClick={() => setOpen(false)}
+                >
+                  Ver tickets vencidos →
+                </Link>
+              </div>
             )}
           </div>
-          <AlertsList alerts={alerts} loading={loading} emptyLabel={emptyLabel} />
-          {alerts.length > 0 && (
-            <div className="border-t border-border px-4 py-2">
-              <Link
-                href="/tickets?sla=breached"
-                className="text-xs font-medium text-brand-600 hover:underline"
-                onClick={() => setOpen(false)}
-              >
-                Ver tickets vencidos →
-              </Link>
-            </div>
-          )}
-        </div>
+        </>
       )}
     </div>
   );
